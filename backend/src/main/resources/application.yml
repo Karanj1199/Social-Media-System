@@ -19,11 +19,11 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
-#
-#  jackson:
-#    serialization:
-#      write-dates-as-timestamps: false
 
 logging:
   level:
     org.springframework.security: INFO
+
+jwt:
+  secret: 6a6f686e646f65736f6369616c6d6564696173797374656d7365637265746b657931323334353637383930
+  expiration: 86400000

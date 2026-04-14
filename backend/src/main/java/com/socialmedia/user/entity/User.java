@@ -45,4 +45,7 @@ public class User extends BaseEntity {
 
     @Column(nullable = false)
     private boolean enabled = true;
+
+    @Column(nullable = false, length = 30)
+    private String role = "ROLE_USER";
 }
