@@ -3,10 +3,8 @@ import api from "../services/api";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
-function RegisterPage() {
+function LoginPage() {
   const [form, setForm] = useState({
-    fullName: "",
-    username: "",
     email: "",
     password: "",
   });
@@ -21,26 +19,24 @@ function RegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await api.post("/api/auth/register", form);
+      const res = await api.post("/api/auth/login", form);
       login(res.data);
       navigate("/");
     } catch (err) {
-      alert("Registration failed");
+      alert("Login failed");
     }
   };
 
   return (
     <div style={{ padding: "2rem" }}>
-      <h2>Register</h2>
+      <h2>Login</h2>
       <form onSubmit={handleSubmit}>
-        <input name="fullName" placeholder="Full Name" onChange={handleChange} /><br />
-        <input name="username" placeholder="Username" onChange={handleChange} /><br />
         <input name="email" placeholder="Email" onChange={handleChange} /><br />
         <input name="password" type="password" placeholder="Password" onChange={handleChange} /><br />
-        <button type="submit">Register</button>
+        <button type="submit">Login</button>
       </form>
     </div>
   );
 }
 
-export default RegisterPage;
+export default LoginPage;
