@@ -29,4 +29,9 @@ public class PostController {
     public List<PostResponse> getPostsByUser(@PathVariable Long userId) {
         return postService.getPostsByUser(userId);
     }
+
+    @GetMapping("/feed")
+    public List<PostResponse> getFeed() {
+        return postService.getFeed();
+    }
 }
