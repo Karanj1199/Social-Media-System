@@ -79,6 +79,10 @@ function HomePage() {
         <Link to="/profile">Go to Profile</Link>
       </div>
 
+      <div style={{ marginBottom: "1rem" }}>
+        <Link to="/people">Discover People</Link>
+      </div>
+
       <button onClick={logout} style={{ marginBottom: "2rem" }}>
         Logout
       </button>

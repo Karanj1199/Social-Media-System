@@ -26,4 +26,9 @@ public class UserController {
     ) {
         return userService.updateProfile(authentication.getName(), request);
     }
+
+    @GetMapping("/{id}")
+    public UserResponse getUserById(@PathVariable Long id) {
+        return userService.getUserById(id);
+    }
 }

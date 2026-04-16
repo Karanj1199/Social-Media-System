@@ -4,6 +4,11 @@ import api from "../services/api";
 function ProfilePage() {
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [followCounts, setFollowCounts] = useState({
+    followersCount: 0,
+    followingCount: 0,
+  });
+
   const [form, setForm] = useState({
     fullName: "",
     bio: "",
@@ -11,6 +16,7 @@ function ProfilePage() {
     headline: "",
     location: "",
   });
+
   const [postContent, setPostContent] = useState("");
   const [message, setMessage] = useState("");
 
@@ -21,7 +27,9 @@ function ProfilePage() {
   const fetchProfile = async () => {
     try {
       const res = await api.get("/api/users/me");
+
       setProfile(res.data);
+
       setForm({
         fullName: res.data.fullName || "",
         bio: res.data.bio || "",
@@ -30,7 +38,15 @@ function ProfilePage() {
         location: res.data.location || "",
       });
 
+      // 🔥 Fetch posts
       fetchPosts(res.data.id);
+
+      // 🔥 Fetch follow counts
+      const countsRes = await api.get(
+        `/api/users/${res.data.id}/follow-counts`
+      );
+      setFollowCounts(countsRes.data);
+
     } catch (err) {
       console.error("Failed to fetch profile", err);
       setMessage("Failed to load profile");
@@ -73,8 +89,10 @@ function ProfilePage() {
       await api.post("/api/posts", {
         content: postContent,
       });
+
       setPostContent("");
       setMessage("Post created successfully");
+
       fetchPosts(profile.id);
     } catch (err) {
       console.error("Failed to create post", err);
@@ -96,6 +114,7 @@ function ProfilePage() {
         </p>
       )}
 
+      {/* PROFILE INFO */}
       <div
         style={{
           marginBottom: "2rem",
@@ -108,17 +127,26 @@ function ProfilePage() {
         <p><strong>Name:</strong> {profile.fullName}</p>
         <p><strong>Username:</strong> {profile.username}</p>
         <p><strong>Email:</strong> {profile.email}</p>
+
         <p><strong>Bio:</strong> {profile.bio || "N/A"}</p>
         <p><strong>Headline:</strong> {profile.headline || "N/A"}</p>
         <p><strong>Location:</strong> {profile.location || "N/A"}</p>
-        <p><strong>Profile Picture URL:</strong> {profile.profilePictureUrl || "N/A"}</p>
+
+        <p><strong>Followers:</strong> {followCounts.followersCount}</p>
+        <p><strong>Following:</strong> {followCounts.followingCount}</p>
       </div>
 
+      {/* EDIT PROFILE */}
       <h3>Edit Profile</h3>
 
       <form
         onSubmit={updateProfile}
-        style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginBottom: "2rem" }}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.75rem",
+          marginBottom: "2rem",
+        }}
       >
         <input
           type="text"
@@ -163,11 +191,17 @@ function ProfilePage() {
         <button type="submit">Update Profile</button>
       </form>
 
+      {/* CREATE POST */}
       <h3>Create Post</h3>
 
       <form
         onSubmit={createPost}
-        style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginBottom: "2rem" }}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.75rem",
+          marginBottom: "2rem",
+        }}
       >
         <textarea
           placeholder="What's on your mind?"
@@ -178,6 +212,7 @@ function ProfilePage() {
         <button type="submit">Create Post</button>
       </form>
 
+      {/* POSTS */}
       <h3>My Posts</h3>
 
       {posts.length === 0 ? (
@@ -197,9 +232,13 @@ function ProfilePage() {
             <p style={{ marginBottom: "0.5rem" }}>
               <strong>{post.fullName}</strong> (@{post.username})
             </p>
+
             <p style={{ marginBottom: "0.5rem" }}>{post.content}</p>
+
             <small>
-              {post.createdAt ? new Date(post.createdAt).toLocaleString() : ""}
+              {post.createdAt
+                ? new Date(post.createdAt).toLocaleString()
+                : ""}
             </small>
           </div>
         ))
