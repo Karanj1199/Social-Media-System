@@ -31,7 +31,7 @@ public class PostController {
     }
 
     @GetMapping("/feed")
-    public List<PostResponse> getFeed() {
-        return postService.getFeed();
+    public List<PostResponse> getFeed(Authentication authentication) {
+        return postService.getFeed(authentication.getName());
     }
 }

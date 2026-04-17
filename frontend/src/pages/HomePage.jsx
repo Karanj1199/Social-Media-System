@@ -43,7 +43,7 @@ function HomePage() {
       await api.post(`/api/posts/${postId}/like`);
       fetchFeed();
     } catch (err) {
-      console.error("Failed to like post", err);
+      console.error("Failed to like/unlike post", err);
     }
   };
 
@@ -73,7 +73,7 @@ function HomePage() {
 
   return (
     <div style={{ padding: "2rem", maxWidth: "700px", margin: "0 auto" }}>
-      <h1>Feed</h1>
+      <h1>Personalized Feed</h1>
 
       <div style={{ marginBottom: "1rem" }}>
         <Link to="/profile">Go to Profile</Link>
@@ -104,9 +104,13 @@ function HomePage() {
             <p>
               <strong>{post.fullName}</strong> (@{post.username})
             </p>
+
             <p>{post.content}</p>
+
             <small>
-              {post.createdAt ? new Date(post.createdAt).toLocaleString() : ""}
+              {post.createdAt
+                ? new Date(post.createdAt).toLocaleString()
+                : ""}
             </small>
 
             <div style={{ marginTop: "1rem" }}>
