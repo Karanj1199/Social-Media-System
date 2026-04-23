@@ -83,6 +83,10 @@ function HomePage() {
         <Link to="/people">Discover People</Link>
       </div>
 
+      <div style={{ marginBottom: "1rem" }}>
+        <Link to="/chat">Open Chat</Link>
+      </div>
+
       <button onClick={logout} style={{ marginBottom: "2rem" }}>
         Logout
       </button>
