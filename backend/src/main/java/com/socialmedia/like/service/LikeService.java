@@ -2,6 +2,7 @@ package com.socialmedia.like.service;
 
 import com.socialmedia.like.entity.PostLike;
 import com.socialmedia.like.repository.PostLikeRepository;
+import com.socialmedia.notification.service.NotificationService;
 import com.socialmedia.post.entity.Post;
 import com.socialmedia.post.repository.PostRepository;
 import com.socialmedia.user.entity.User;
@@ -19,6 +20,7 @@ public class LikeService {
     private final PostLikeRepository postLikeRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public Map<String, Object> toggleLike(Long postId, String email) {
@@ -38,6 +40,14 @@ public class LikeService {
                     .user(user)
                     .build();
             postLikeRepository.save(like);
+
+            if (!post.getUser().getId().equals(user.getId())) {
+                notificationService.createNotification(
+                        post.getUser().getId(),
+                        "LIKE",
+                        user.getUsername() + " liked your post"
+                );
+            }
         }
 
         long likesCount = postLikeRepository.countByPostId(postId);

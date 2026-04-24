@@ -75,8 +75,9 @@ function HomePage() {
     <div style={{ padding: "2rem", maxWidth: "700px", margin: "0 auto" }}>
       <h1>Personalized Feed</h1>
 
+      {/* NAVIGATION LINKS */}
       <div style={{ marginBottom: "1rem" }}>
-        <Link to="/profile">Go to Profile</Link>
+        <Link to="/profile">Profile</Link>
       </div>
 
       <div style={{ marginBottom: "1rem" }}>
@@ -84,13 +85,22 @@ function HomePage() {
       </div>
 
       <div style={{ marginBottom: "1rem" }}>
-        <Link to="/chat">Open Chat</Link>
+        <Link to="/chat">Chat</Link>
+      </div>
+
+      <div style={{ marginBottom: "1rem" }}>
+        <Link to="/notifications">Notifications</Link>
+      </div>
+
+      <div style={{ marginBottom: "1rem" }}>
+        <Link to="/search">Search Users</Link>
       </div>
 
       <button onClick={logout} style={{ marginBottom: "2rem" }}>
         Logout
       </button>
 
+      {/* POSTS */}
       {posts.length === 0 ? (
         <p>No posts yet.</p>
       ) : (
@@ -117,12 +127,14 @@ function HomePage() {
                 : ""}
             </small>
 
+            {/* LIKE BUTTON */}
             <div style={{ marginTop: "1rem" }}>
               <button onClick={() => toggleLike(post.id)}>
                 Like ({post.likesCount || 0})
               </button>
             </div>
 
+            {/* COMMENTS */}
             <div style={{ marginTop: "1rem" }}>
               <h4>Comments</h4>
 
@@ -151,6 +163,7 @@ function HomePage() {
                 ))
               )}
 
+              {/* ADD COMMENT */}
               <div style={{ marginTop: "0.75rem" }}>
                 <input
                   type="text"

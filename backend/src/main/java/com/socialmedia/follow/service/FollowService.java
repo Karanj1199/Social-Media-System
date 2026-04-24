@@ -3,6 +3,7 @@ package com.socialmedia.follow.service;
 import com.socialmedia.follow.dto.FollowUserResponse;
 import com.socialmedia.follow.entity.Follow;
 import com.socialmedia.follow.repository.FollowRepository;
+import com.socialmedia.notification.service.NotificationService;
 import com.socialmedia.user.entity.User;
 import com.socialmedia.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class FollowService {
 
     private final FollowRepository followRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public Map<String, Object> followUser(Long targetUserId, String currentUserEmail) {
@@ -49,6 +51,12 @@ public class FollowService {
                 .build();
 
         followRepository.save(follow);
+
+        notificationService.createNotification(
+                targetUser.getId(),
+                "FOLLOW",
+                currentUser.getUsername() + " started following you"
+        );
 
         return Map.of(
                 "message", "User followed successfully",

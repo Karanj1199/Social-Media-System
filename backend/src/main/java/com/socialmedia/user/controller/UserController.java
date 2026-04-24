@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -19,16 +21,21 @@ public class UserController {
         return userService.getCurrentUser(authentication.getName());
     }
 
+    @GetMapping("/search")
+    public List<UserResponse> searchUsers(@RequestParam String query) {
+        return userService.searchUsers(query);
+    }
+
+    @GetMapping("/{id}")
+    public UserResponse getUserById(@PathVariable Long id) {
+        return userService.getUserById(id);
+    }
+
     @PutMapping("/profile")
     public UserResponse updateProfile(
             Authentication authentication,
             @RequestBody UpdateProfileRequest request
     ) {
         return userService.updateProfile(authentication.getName(), request);
-    }
-
-    @GetMapping("/{id}")
-    public UserResponse getUserById(@PathVariable Long id) {
-        return userService.getUserById(id);
     }
 }

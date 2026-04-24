@@ -4,6 +4,7 @@ import com.socialmedia.comment.dto.CommentRequest;
 import com.socialmedia.comment.dto.CommentResponse;
 import com.socialmedia.comment.entity.Comment;
 import com.socialmedia.comment.repository.CommentRepository;
+import com.socialmedia.notification.service.NotificationService;
 import com.socialmedia.post.entity.Post;
 import com.socialmedia.post.repository.PostRepository;
 import com.socialmedia.user.entity.User;
@@ -20,6 +21,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public CommentResponse addComment(Long postId, String email, CommentRequest request) {
         User user = userRepository.findByEmail(email)
@@ -35,6 +37,15 @@ public class CommentService {
                 .build();
 
         Comment savedComment = commentRepository.save(comment);
+
+        if (!post.getUser().getId().equals(user.getId())) {
+            notificationService.createNotification(
+                    post.getUser().getId(),
+                    "COMMENT",
+                    user.getUsername() + " commented on your post"
+            );
+        }
+
         return mapToResponse(savedComment);
     }
 

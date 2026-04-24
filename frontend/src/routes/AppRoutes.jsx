@@ -5,6 +5,8 @@ import HomePage from "../pages/HomePage";
 import ProfilePage from "../pages/ProfilePage";
 import PeoplePage from "../pages/PeoplePage";
 import ChatPage from "../pages/ChatPage";
+import NotificationsPage from "../pages/NotificationsPage";
+import SearchPage from "../pages/SearchPage";
 import ProtectedRoute from "../components/ProtectedRoute";
 
 function AppRoutes() {
@@ -19,10 +21,8 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
-
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-
         <Route
           path="/profile"
           element={
@@ -31,7 +31,6 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/people"
           element={
@@ -40,12 +39,27 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/chat"
           element={
             <ProtectedRoute>
               <ChatPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <NotificationsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/search"
+          element={
+            <ProtectedRoute>
+              <SearchPage />
             </ProtectedRoute>
           }
         />
