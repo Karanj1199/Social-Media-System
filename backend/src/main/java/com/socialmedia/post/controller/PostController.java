@@ -5,6 +5,7 @@ import com.socialmedia.post.dto.PostResponse;
 import com.socialmedia.post.service.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,12 +27,20 @@ public class PostController {
     }
 
     @GetMapping("/user/{userId}")
-    public List<PostResponse> getPostsByUser(@PathVariable Long userId) {
-        return postService.getPostsByUser(userId);
+    public Page<PostResponse> getPostsByUser(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        return postService.getPostsByUser(userId, page, size);
     }
 
     @GetMapping("/feed")
-    public List<PostResponse> getFeed(Authentication authentication) {
-        return postService.getFeed(authentication.getName());
+    public Page<PostResponse> getFeed(
+            Authentication authentication,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        return postService.getFeed(authentication.getName(), page, size);
     }
 }

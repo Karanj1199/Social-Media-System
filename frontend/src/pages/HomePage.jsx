@@ -7,20 +7,31 @@ function HomePage() {
   const [posts, setPosts] = useState([]);
   const [commentsByPost, setCommentsByPost] = useState({});
   const [commentInputs, setCommentInputs] = useState({});
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+
   const { logout } = useContext(AuthContext);
 
   useEffect(() => {
-    fetchFeed();
+    fetchFeed(0);
   }, []);
 
-  const fetchFeed = async () => {
+  const fetchFeed = async (pageNumber = 0) => {
     try {
-      const res = await api.get("/api/posts/feed");
-      setPosts(res.data);
+      const res = await api.get(`/api/posts/feed?page=${pageNumber}&size=5`);
 
-      res.data.forEach((post) => {
+      if (pageNumber === 0) {
+        setPosts(res.data.content);
+      } else {
+        setPosts((prev) => [...prev, ...res.data.content]);
+      }
+
+      setHasMore(!res.data.last);
+
+      res.data.content.forEach((post) => {
         fetchComments(post.id);
       });
+
     } catch (err) {
       console.error("Failed to fetch feed", err);
     }
@@ -28,10 +39,10 @@ function HomePage() {
 
   const fetchComments = async (postId) => {
     try {
-      const res = await api.get(`/api/posts/${postId}/comments`);
+      const res = await api.get(`/api/posts/${postId}/comments?page=0&size=5`);
       setCommentsByPost((prev) => ({
         ...prev,
-        [postId]: res.data,
+        [postId]: res.data.content,
       }));
     } catch (err) {
       console.error("Failed to fetch comments", err);
@@ -41,7 +52,7 @@ function HomePage() {
   const toggleLike = async (postId) => {
     try {
       await api.post(`/api/posts/${postId}/like`);
-      fetchFeed();
+      fetchFeed(0); // refresh first page
     } catch (err) {
       console.error("Failed to like/unlike post", err);
     }
@@ -60,22 +71,29 @@ function HomePage() {
 
     try {
       await api.post(`/api/posts/${postId}/comments`, { content });
+
       setCommentInputs((prev) => ({
         ...prev,
         [postId]: "",
       }));
+
       fetchComments(postId);
-      fetchFeed();
     } catch (err) {
       console.error("Failed to add comment", err);
     }
+  };
+
+  const loadMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchFeed(nextPage);
   };
 
   return (
     <div style={{ padding: "2rem", maxWidth: "700px", margin: "0 auto" }}>
       <h1>Personalized Feed</h1>
 
-      {/* NAVIGATION LINKS */}
+      {/* NAVIGATION */}
       <div style={{ marginBottom: "1rem" }}>
         <Link to="/profile">Profile</Link>
       </div>
@@ -127,7 +145,7 @@ function HomePage() {
                 : ""}
             </small>
 
-            {/* LIKE BUTTON */}
+            {/* LIKE */}
             <div style={{ marginTop: "1rem" }}>
               <button onClick={() => toggleLike(post.id)}>
                 Like ({post.likesCount || 0})
@@ -179,6 +197,13 @@ function HomePage() {
             </div>
           </div>
         ))
+      )}
+
+      {/* LOAD MORE BUTTON */}
+      {hasMore && (
+        <div style={{ textAlign: "center", marginTop: "1rem" }}>
+          <button onClick={loadMore}>Load More</button>
+        </div>
       )}
     </div>
   );

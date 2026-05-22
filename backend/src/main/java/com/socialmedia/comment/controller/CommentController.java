@@ -5,6 +5,7 @@ import com.socialmedia.comment.dto.CommentResponse;
 import com.socialmedia.comment.service.CommentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +28,11 @@ public class CommentController {
     }
 
     @GetMapping("/{postId}/comments")
-    public List<CommentResponse> getComments(@PathVariable Long postId) {
-        return commentService.getCommentsByPost(postId);
+    public Page<CommentResponse> getComments(
+            @PathVariable Long postId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        return commentService.getCommentsByPost(postId, page, size);
     }
 }

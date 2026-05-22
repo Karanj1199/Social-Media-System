@@ -10,6 +10,8 @@ import com.socialmedia.post.repository.PostRepository;
 import com.socialmedia.user.entity.User;
 import com.socialmedia.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -49,11 +51,10 @@ public class CommentService {
         return mapToResponse(savedComment);
     }
 
-    public List<CommentResponse> getCommentsByPost(Long postId) {
-        return commentRepository.findByPostIdOrderByCreatedAtAsc(postId)
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
+    public Page<CommentResponse> getCommentsByPost(Long postId, int page, int size) {
+        return commentRepository
+                .findByPostIdOrderByCreatedAtAsc(postId, PageRequest.of(page, size))
+                .map(this::mapToResponse);
     }
 
     private CommentResponse mapToResponse(Comment comment) {

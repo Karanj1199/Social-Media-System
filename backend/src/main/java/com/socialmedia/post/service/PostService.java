@@ -9,7 +9,11 @@ import com.socialmedia.post.repository.PostRepository;
 import com.socialmedia.user.entity.User;
 import com.socialmedia.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,35 +40,34 @@ public class PostService {
         return mapToResponse(savedPost);
     }
 
-    public List<PostResponse> getPostsByUser(Long userId) {
-        return postRepository.findByUserIdOrderByCreatedAtDesc(userId)
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
+    @Transactional(readOnly = true)
+    public Page<PostResponse> getPostsByUser(Long userId, int page, int size) {
+        return postRepository.findByUserId(userId, PageRequest.of(page, size))
+                .map(this::mapToResponse);
     }
 
-    public List<PostResponse> getFeed(String email) {
+    @Transactional(readOnly = true)
+    public Page<PostResponse> getFeed(String email, int page, int size) {
         User currentUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         List<Long> feedUserIds = new ArrayList<>();
-
         feedUserIds.add(currentUser.getId());
 
         followRepository.findByFollowerId(currentUser.getId())
                 .forEach(follow -> feedUserIds.add(follow.getFollowing().getId()));
 
-        List<Post> posts;
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Post> posts;
 
         if (feedUserIds.size() == 1) {
-            posts = postRepository.findAllByOrderByCreatedAtDesc();
+            posts = postRepository.findAll(pageable);
         } else {
-            posts = postRepository.findByUserIdInOrderByCreatedAtDesc(feedUserIds);
+            posts = postRepository.findByUserIdIn(feedUserIds, pageable);
         }
 
-        return posts.stream()
-                .map(this::mapToResponse)
-                .toList();
+        return posts.map(this::mapToResponse);
     }
 
     private PostResponse mapToResponse(Post post) {
