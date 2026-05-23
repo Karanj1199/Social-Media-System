@@ -1,20 +1,38 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState } from "react";
 import api from "../services/api";
-import { AuthContext } from "../context/AuthContext";
-import { Link } from "react-router-dom";
 
 function HomePage() {
+  const [currentUser, setCurrentUser] = useState(null);
   const [posts, setPosts] = useState([]);
   const [commentsByPost, setCommentsByPost] = useState({});
   const [commentInputs, setCommentInputs] = useState({});
+  const [postContent, setPostContent] = useState("");
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
 
-  const { logout } = useContext(AuthContext);
-
   useEffect(() => {
+    fetchCurrentUser();
     fetchFeed(0);
   }, []);
+
+  const fetchCurrentUser = async () => {
+    try {
+      const res = await api.get("/api/users/me");
+      setCurrentUser(res.data);
+    } catch (err) {
+      console.error("Failed to fetch current user", err);
+    }
+  };
+
+  const getInitials = (name) => {
+    if (!name) return "U";
+    return name
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
+  };
 
   const fetchFeed = async (pageNumber = 0) => {
     try {
@@ -33,6 +51,24 @@ function HomePage() {
       });
     } catch (err) {
       console.error("Failed to fetch feed", err);
+    }
+  };
+
+  const createPost = async (e) => {
+    e.preventDefault();
+
+    if (!postContent.trim()) return;
+
+    try {
+      await api.post("/api/posts", {
+        content: postContent,
+      });
+
+      setPostContent("");
+      setPage(0);
+      fetchFeed(0);
+    } catch (err) {
+      console.error("Failed to create post", err);
     }
   };
 
@@ -67,6 +103,7 @@ function HomePage() {
 
   const addComment = async (postId) => {
     const content = commentInputs[postId];
+
     if (!content || !content.trim()) return;
 
     try {
@@ -92,101 +129,77 @@ function HomePage() {
   };
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "700px", margin: "0 auto" }}>
-      <h1>Personalized Feed</h1>
+    <div className="page-container">
+      <h1 className="page-title">Home Feed</h1>
 
-      <div style={{ marginBottom: "1rem" }}>
-        <Link to="/profile">Profile</Link>
-      </div>
-
-      <div style={{ marginBottom: "1rem" }}>
-        <Link to="/people">Discover People</Link>
-      </div>
-
-      <div style={{ marginBottom: "1rem" }}>
-        <Link to="/chat">Chat</Link>
-      </div>
-
-      <div style={{ marginBottom: "1rem" }}>
-        <Link to="/notifications">Notifications</Link>
-      </div>
-
-      <div style={{ marginBottom: "1rem" }}>
-        <Link to="/search">Search Users</Link>
-      </div>
-
-      <div style={{ marginBottom: "1rem" }}>
-        <Link to="/trending">Trending Posts</Link>
-      </div>
-
-      <div style={{ marginBottom: "1rem" }}>
-        <Link to="/recommendations">Recommendations</Link>
-      </div>
-
-      <button onClick={logout} style={{ marginBottom: "2rem" }}>
-        Logout
-      </button>
-
-      {posts.length === 0 ? (
-        <p>No posts yet.</p>
-      ) : (
-        posts.map((post) => (
-          <div
-            key={post.id}
-            style={{
-              border: "1px solid #ddd",
-              borderRadius: "8px",
-              padding: "1rem",
-              marginBottom: "1rem",
-              backgroundColor: "#fff",
-            }}
-          >
-            <p>
-              <strong>{post.fullName}</strong> (@{post.username})
-            </p>
-
-            <p>{post.content}</p>
-
-            <small>
-              {post.createdAt
-                ? new Date(post.createdAt).toLocaleString()
-                : ""}
-            </small>
-
-            <div style={{ marginTop: "0.75rem" }}>
-              <small>Likes: {post.likesCount || 0}</small>
-              {" | "}
-              <small>Comments: {post.commentsCount || 0}</small>
-              {" | "}
-              <small>Score: {post.engagementScore || 0}</small>
+      <div className="feed-composer">
+        <form onSubmit={createPost}>
+          <div className="composer-header">
+            <div className="small-avatar">
+              {getInitials(currentUser?.fullName)}
             </div>
 
-            <div style={{ marginTop: "1rem" }}>
-              <button onClick={() => toggleLike(post.id)}>
-                Like ({post.likesCount || 0})
+            <textarea
+              placeholder="Share something with your network..."
+              value={postContent}
+              onChange={(e) => setPostContent(e.target.value)}
+              rows="3"
+            />
+          </div>
+
+          <div className="composer-actions">
+            <button type="submit">Post</button>
+          </div>
+        </form>
+      </div>
+
+      {posts.length === 0 ? (
+        <div className="card">
+          <p>No posts yet.</p>
+        </div>
+      ) : (
+        posts.map((post) => (
+          <article className="post-card" key={post.id}>
+            <div className="post-header">
+              <div className="small-avatar">{getInitials(post.fullName)}</div>
+
+              <div>
+                <p className="post-author">{post.fullName}</p>
+                <p className="meta">
+                  @{post.username} ·{" "}
+                  {post.createdAt
+                    ? new Date(post.createdAt).toLocaleString()
+                    : ""}
+                </p>
+              </div>
+            </div>
+
+            <p className="post-content">{post.content}</p>
+
+            <div className="post-stats">
+              <span>{post.likesCount || 0} likes</span>
+              <span>{post.commentsCount || 0} comments</span>
+              <span>Score {post.engagementScore || 0}</span>
+            </div>
+
+            <div className="post-actions">
+              <button className="secondary-btn" onClick={() => toggleLike(post.id)}>
+                Like
               </button>
             </div>
 
-            <div style={{ marginTop: "1rem" }}>
-              <h4>Comments</h4>
-
+            <div className="comment-list">
               {(commentsByPost[post.id] || []).length === 0 ? (
-                <p>No comments yet.</p>
+                <p className="meta">No comments yet.</p>
               ) : (
                 (commentsByPost[post.id] || []).map((comment) => (
-                  <div
-                    key={comment.id}
-                    style={{
-                      borderTop: "1px solid #eee",
-                      paddingTop: "0.5rem",
-                      marginTop: "0.5rem",
-                    }}
-                  >
+                  <div className="comment-item" key={comment.id}>
                     <p style={{ margin: 0 }}>
-                      <strong>{comment.fullName}</strong> (@{comment.username})
+                      <strong>{comment.fullName}</strong>{" "}
+                      <span className="meta">@{comment.username}</span>
                     </p>
-                    <p style={{ margin: "0.25rem 0" }}>{comment.content}</p>
-                    <small>
+                    <p style={{ margin: "4px 0" }}>{comment.content}</p>
+                    <small className="meta">
                       {comment.createdAt
                         ? new Date(comment.createdAt).toLocaleString()
                         : ""}
@@ -195,7 +208,7 @@ function HomePage() {
                 ))
               )}
 
-              <div style={{ marginTop: "0.75rem" }}>
+              <div className="comment-box">
                 <input
                   type="text"
                   placeholder="Write a comment..."
@@ -203,12 +216,11 @@ function HomePage() {
                   onChange={(e) =>
                     handleCommentInputChange(post.id, e.target.value)
                   }
-                  style={{ width: "70%", marginRight: "0.5rem" }}
                 />
                 <button onClick={() => addComment(post.id)}>Comment</button>
               </div>
             </div>
-          </div>
+          </article>
         ))
       )}
 
