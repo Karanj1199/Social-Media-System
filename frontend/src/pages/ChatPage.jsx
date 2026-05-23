@@ -91,15 +91,37 @@ function ChatPage() {
     stompClientRef.current = client;
   };
 
-  const loadConversation = async (otherUser) => {
-    try {
-      setSelectedUser(otherUser);
-      const res = await api.get(`/api/messages/conversation/${otherUser.id}`);
-      setMessages(res.data);
-    } catch (err) {
-      console.error("Failed to load conversation", err);
+const loadConversation = async (otherUser) => {
+  try {
+    setSelectedUser(otherUser);
+
+    const res = await api.get(`/api/messages/conversation/${otherUser.id}`);
+    setMessages(res.data);
+
+    const roomId =
+      currentUser.id < otherUser.id
+        ? `${currentUser.id}-${otherUser.id}`
+        : `${otherUser.id}-${currentUser.id}`;
+
+    if (stompClientRef.current?.connected) {
+      stompClientRef.current.subscribe(
+        `/topic/conversation/${roomId}`,
+        (message) => {
+          const receivedMessage = JSON.parse(message.body);
+
+          setMessages((prev) => {
+            const exists = prev.some((msg) => msg.id === receivedMessage.id);
+            if (exists) return prev;
+
+            return [...prev, receivedMessage];
+          });
+        }
+      );
     }
-  };
+  } catch (err) {
+    console.error("Failed to load conversation", err);
+  }
+};
 
 //   const sendMessage = async () => {
 //     if (!messageInput.trim() || !selectedUser || !stompClientRef.current) return;
@@ -118,19 +140,21 @@ function ChatPage() {
 //   };
 
 const sendMessage = async () => {
-  if (!messageInput.trim() || !selectedUser) return;
-
-  try {
-    const res = await api.post("/api/messages", {
-      receiverId: selectedUser.id,
-      content: messageInput,
-    });
-
-    setMessages((prev) => [...prev, res.data]);
-    setMessageInput("");
-  } catch (err) {
-    console.error("Failed to send message", err);
+  if (!messageInput.trim() || !selectedUser || !stompClientRef.current) {
+    return;
   }
+
+  const payload = {
+    receiverId: selectedUser.id,
+    content: messageInput,
+  };
+
+  stompClientRef.current.publish({
+    destination: "/app/chat.send",
+    body: JSON.stringify(payload),
+  });
+
+  setMessageInput("");
 };
 
   const scrollToBottom = () => {

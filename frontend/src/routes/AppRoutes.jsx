@@ -8,6 +8,8 @@ import ChatPage from "../pages/ChatPage";
 import NotificationsPage from "../pages/NotificationsPage";
 import SearchPage from "../pages/SearchPage";
 import ProtectedRoute from "../components/ProtectedRoute";
+import TrendingPage from "../pages/TrendingPage";
+import RecommendationsPage from "../pages/RecommendationsPage";
 
 function AppRoutes() {
   return (
@@ -60,6 +62,23 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <SearchPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/trending"
+          element={
+            <ProtectedRoute>
+              <TrendingPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/recommendations"
+          element={
+            <ProtectedRoute>
+              <RecommendationsPage />
             </ProtectedRoute>
           }
         />

@@ -31,7 +31,6 @@ function HomePage() {
       res.data.content.forEach((post) => {
         fetchComments(post.id);
       });
-
     } catch (err) {
       console.error("Failed to fetch feed", err);
     }
@@ -52,7 +51,8 @@ function HomePage() {
   const toggleLike = async (postId) => {
     try {
       await api.post(`/api/posts/${postId}/like`);
-      fetchFeed(0); // refresh first page
+      setPage(0);
+      fetchFeed(0);
     } catch (err) {
       console.error("Failed to like/unlike post", err);
     }
@@ -78,6 +78,8 @@ function HomePage() {
       }));
 
       fetchComments(postId);
+      setPage(0);
+      fetchFeed(0);
     } catch (err) {
       console.error("Failed to add comment", err);
     }
@@ -93,7 +95,6 @@ function HomePage() {
     <div style={{ padding: "2rem", maxWidth: "700px", margin: "0 auto" }}>
       <h1>Personalized Feed</h1>
 
-      {/* NAVIGATION */}
       <div style={{ marginBottom: "1rem" }}>
         <Link to="/profile">Profile</Link>
       </div>
@@ -114,11 +115,18 @@ function HomePage() {
         <Link to="/search">Search Users</Link>
       </div>
 
+      <div style={{ marginBottom: "1rem" }}>
+        <Link to="/trending">Trending Posts</Link>
+      </div>
+
+      <div style={{ marginBottom: "1rem" }}>
+        <Link to="/recommendations">Recommendations</Link>
+      </div>
+
       <button onClick={logout} style={{ marginBottom: "2rem" }}>
         Logout
       </button>
 
-      {/* POSTS */}
       {posts.length === 0 ? (
         <p>No posts yet.</p>
       ) : (
@@ -145,14 +153,20 @@ function HomePage() {
                 : ""}
             </small>
 
-            {/* LIKE */}
+            <div style={{ marginTop: "0.75rem" }}>
+              <small>Likes: {post.likesCount || 0}</small>
+              {" | "}
+              <small>Comments: {post.commentsCount || 0}</small>
+              {" | "}
+              <small>Score: {post.engagementScore || 0}</small>
+            </div>
+
             <div style={{ marginTop: "1rem" }}>
               <button onClick={() => toggleLike(post.id)}>
                 Like ({post.likesCount || 0})
               </button>
             </div>
 
-            {/* COMMENTS */}
             <div style={{ marginTop: "1rem" }}>
               <h4>Comments</h4>
 
@@ -181,7 +195,6 @@ function HomePage() {
                 ))
               )}
 
-              {/* ADD COMMENT */}
               <div style={{ marginTop: "0.75rem" }}>
                 <input
                   type="text"
@@ -199,8 +212,7 @@ function HomePage() {
         ))
       )}
 
-      {/* LOAD MORE BUTTON */}
-      {hasMore && (
+      {hasMore && posts.length > 0 && (
         <div style={{ textAlign: "center", marginTop: "1rem" }}>
           <button onClick={loadMore}>Load More</button>
         </div>

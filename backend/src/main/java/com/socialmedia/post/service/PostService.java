@@ -1,5 +1,6 @@
 package com.socialmedia.post.service;
 
+import com.socialmedia.comment.repository.CommentRepository;
 import com.socialmedia.follow.repository.FollowRepository;
 import com.socialmedia.like.repository.PostLikeRepository;
 import com.socialmedia.post.dto.CreatePostRequest;
@@ -26,6 +27,7 @@ public class PostService {
     private final UserRepository userRepository;
     private final PostLikeRepository postLikeRepository;
     private final FollowRepository followRepository;
+    private final CommentRepository commentRepository;
 
     public PostResponse createPost(String email, CreatePostRequest request) {
         User user = userRepository.findByEmail(email)
@@ -70,8 +72,27 @@ public class PostService {
         return posts.map(this::mapToResponse);
     }
 
+    @Transactional(readOnly = true)
+    public List<PostResponse> getTrendingPosts() {
+
+        return postRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .sorted((a, b) ->
+                        Long.compare(b.getEngagementScore(), a.getEngagementScore()))
+                .limit(10)
+                .toList();
+    }
+
     private PostResponse mapToResponse(Post post) {
+
         long likesCount = postLikeRepository.countByPostId(post.getId());
+
+        long commentsCount = commentRepository.countByPostId(post.getId());
+
+        long engagementScore =
+                (likesCount * 2) +
+                        (commentsCount * 3);
 
         return PostResponse.builder()
                 .id(post.getId())
@@ -81,6 +102,8 @@ public class PostService {
                 .fullName(post.getUser().getFullName())
                 .createdAt(post.getCreatedAt())
                 .likesCount(likesCount)
+                .commentsCount(commentsCount)
+                .engagementScore(engagementScore)
                 .build();
     }
 }

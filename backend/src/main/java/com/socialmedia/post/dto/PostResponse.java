@@ -8,11 +8,17 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 public class PostResponse {
+
     private Long id;
     private String content;
+
     private Long userId;
     private String username;
     private String fullName;
+
     private LocalDateTime createdAt;
+
     private long likesCount;
+    private long commentsCount;
+    private long engagementScore;
 }

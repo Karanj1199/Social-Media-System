@@ -1,5 +1,6 @@
 package com.socialmedia.user.service;
 
+import com.socialmedia.follow.repository.FollowRepository;
 import com.socialmedia.user.dto.UpdateProfileRequest;
 import com.socialmedia.user.dto.UserResponse;
 import com.socialmedia.user.entity.User;
@@ -16,6 +17,7 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final FollowRepository followRepository;
 
     public UserResponse getCurrentUser(String email) {
         User user = userRepository.findByEmail(email)
@@ -50,6 +52,26 @@ public class UserService {
         return userRepository.findByUsernameContainingIgnoreCaseOrFullNameContainingIgnoreCase(query, query)
                 .stream()
                 .map(this::mapToResponse)
+                .toList();
+    }
+
+    public List<UserResponse> getRecommendedUsers(String email) {
+
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<Long> followedIds = followRepository.findByFollowerId(currentUser.getId())
+                .stream()
+                .map(follow -> follow.getFollowing().getId())
+                .toList();
+
+        return userRepository.findAll()
+                .stream()
+                .filter(user ->
+                        !user.getId().equals(currentUser.getId()) &&
+                                !followedIds.contains(user.getId()))
+                .map(this::mapToResponse)
+                .limit(10)
                 .toList();
     }
 

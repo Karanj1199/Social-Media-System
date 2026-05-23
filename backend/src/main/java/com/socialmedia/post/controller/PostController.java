@@ -43,4 +43,9 @@ public class PostController {
     ) {
         return postService.getFeed(authentication.getName(), page, size);
     }
+
+    @GetMapping("/trending")
+    public List<PostResponse> getTrendingPosts() {
+        return postService.getTrendingPosts();
+    }
 }

@@ -46,15 +46,15 @@ public class ChatController {
     public void sendMessage(ChatMessageRequest request, Principal principal) {
         ChatMessageResponse savedMessage = chatService.saveMessage(principal.getName(), request);
 
-        messagingTemplate.convertAndSendToUser(
-                String.valueOf(savedMessage.getReceiverId()),
-                "/queue/messages",
-                savedMessage
-        );
+        Long user1 = savedMessage.getSenderId();
+        Long user2 = savedMessage.getReceiverId();
 
-        messagingTemplate.convertAndSendToUser(
-                String.valueOf(savedMessage.getSenderId()),
-                "/queue/messages",
+        String roomId = user1 < user2
+                ? user1 + "-" + user2
+                : user2 + "-" + user1;
+
+        messagingTemplate.convertAndSend(
+                "/topic/conversation/" + roomId,
                 savedMessage
         );
     }

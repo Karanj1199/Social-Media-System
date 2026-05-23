@@ -38,4 +38,9 @@ public class UserController {
     ) {
         return userService.updateProfile(authentication.getName(), request);
     }
+
+    @GetMapping("/recommended")
+    public List<UserResponse> getRecommendedUsers(Authentication authentication) {
+        return userService.getRecommendedUsers(authentication.getName());
+    }
 }
