@@ -94,7 +94,10 @@ function ChatPage() {
   };
 
 const sendMessage = async () => {
-  if (!messageInput.trim() || !selectedUser) return;
+  if (!messageInput.trim() || !selectedUser) {
+    toast.error("Message cannot be empty");
+    return;
+  }
 
   try {
     const res = await api.post("/api/messages", {
@@ -106,6 +109,7 @@ const sendMessage = async () => {
     setMessageInput("");
   } catch (err) {
     console.error("Failed to send message", err);
+    toast.error("Failed to send message");
   }
 };
 

@@ -21,4 +21,6 @@ public class PostResponse {
     private long likesCount;
     private long commentsCount;
     private long engagementScore;
+    private String profilePictureUrl;
+    private String imageUrl;
 }

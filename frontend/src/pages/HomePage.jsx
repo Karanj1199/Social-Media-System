@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
+import toast from "react-hot-toast";
 
 function HomePage() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -7,6 +8,7 @@ function HomePage() {
   const [commentsByPost, setCommentsByPost] = useState({});
   const [commentInputs, setCommentInputs] = useState({});
   const [postContent, setPostContent] = useState("");
+  const [postImageUrl, setPostImageUrl] = useState("");
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
 
@@ -54,23 +56,54 @@ function HomePage() {
     }
   };
 
-  const createPost = async (e) => {
-    e.preventDefault();
+ const createPost = async (e) => {
+   e.preventDefault();
 
-    if (!postContent.trim()) return;
+   if (!postContent.trim() && !postImageUrl) {
+     toast.error("Post cannot be empty");
+     return;
+   }
 
-    try {
-      await api.post("/api/posts", {
-        content: postContent,
-      });
+   try {
+     await api.post("/api/posts", {
+       content: postContent,
+       imageUrl: postImageUrl,
+     });
 
-      setPostContent("");
-      setPage(0);
-      fetchFeed(0);
-    } catch (err) {
-      console.error("Failed to create post", err);
-    }
-  };
+     toast.success("Post created successfully");
+
+     setPostContent("");
+     setPostImageUrl("");
+     setPage(0);
+     fetchFeed(0);
+   } catch (err) {
+     console.error("Failed to create post", err);
+     toast.error("Failed to create post");
+   }
+ };
+
+const uploadPostImage = async (e) => {
+  const file = e.target.files[0];
+
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const res = await api.post("/api/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    setPostImageUrl(res.data);
+    toast.success("Image uploaded");
+  } catch (err) {
+    console.error("Failed to upload image", err);
+    toast.error("Failed to upload image");
+  }
+};
 
   const fetchComments = async (postId) => {
     try {
@@ -84,15 +117,15 @@ function HomePage() {
     }
   };
 
-  const toggleLike = async (postId) => {
-    try {
-      await api.post(`/api/posts/${postId}/like`);
-      setPage(0);
-      fetchFeed(0);
-    } catch (err) {
-      console.error("Failed to like/unlike post", err);
-    }
-  };
+const toggleLike = async (postId) => {
+  try {
+    await api.post(`/api/posts/${postId}/like`);
+    fetchFeed(0);
+  } catch (err) {
+    console.error("Failed to like/unlike post", err);
+    toast.error("Failed to update like");
+  }
+};
 
   const handleCommentInputChange = (postId, value) => {
     setCommentInputs((prev) => ({
@@ -101,26 +134,32 @@ function HomePage() {
     }));
   };
 
-  const addComment = async (postId) => {
-    const content = commentInputs[postId];
+const addComment = async (postId) => {
+  const content = commentInputs[postId];
 
-    if (!content || !content.trim()) return;
+  if (!content || !content.trim()) {
+    toast.error("Comment cannot be empty");
+    return;
+  }
 
-    try {
-      await api.post(`/api/posts/${postId}/comments`, { content });
+  try {
+    await api.post(`/api/posts/${postId}/comments`, { content });
 
-      setCommentInputs((prev) => ({
-        ...prev,
-        [postId]: "",
-      }));
+    setCommentInputs((prev) => ({
+      ...prev,
+      [postId]: "",
+    }));
 
-      fetchComments(postId);
-      setPage(0);
-      fetchFeed(0);
-    } catch (err) {
-      console.error("Failed to add comment", err);
-    }
-  };
+    toast.success("Comment added");
+
+    fetchComments(postId);
+    setPage(0);
+    fetchFeed(0);
+  } catch (err) {
+    console.error("Failed to add comment", err);
+    toast.error("Failed to add comment");
+  }
+};
 
   const loadMore = () => {
     const nextPage = page + 1;
@@ -145,6 +184,21 @@ function HomePage() {
               onChange={(e) => setPostContent(e.target.value)}
               rows="3"
             />
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={uploadPostImage}
+            />
+
+            {postImageUrl && (
+              <img
+                src={`http://localhost:8080${postImageUrl}`}
+                alt="Preview"
+                className="post-image"
+              />
+            )}
+
           </div>
 
           <div className="composer-actions">
@@ -161,7 +215,17 @@ function HomePage() {
         posts.map((post) => (
           <article className="post-card" key={post.id}>
             <div className="post-header">
-              <div className="small-avatar">{getInitials(post.fullName)}</div>
+              <div className="small-avatar">
+                {post.profilePictureUrl ? (
+                  <img
+                    src={`http://localhost:8080${post.profilePictureUrl}`}
+                    alt="Profile"
+                    className="avatar-img"
+                  />
+                ) : (
+                  getInitials(post.fullName)
+                )}
+              </div>
 
               <div>
                 <p className="post-author">{post.fullName}</p>
@@ -175,6 +239,14 @@ function HomePage() {
             </div>
 
             <p className="post-content">{post.content}</p>
+
+            {post.imageUrl && (
+              <img
+                src={`http://localhost:8080${post.imageUrl}`}
+                alt="Post"
+                className="post-image"
+              />
+            )}
 
             <div className="post-stats">
               <span>{post.likesCount || 0} likes</span>

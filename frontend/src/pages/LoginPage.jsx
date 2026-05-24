@@ -2,6 +2,7 @@ import { useState, useContext } from "react";
 import api from "../services/api";
 import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -13,18 +14,20 @@ function LoginPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
 
-    try {
-      const res = await api.post("/api/auth/login", form);
-      login(res.data);
-      navigate("/");
-    } catch (err) {
-      setError("Invalid email or password");
-    }
-  };
+  try {
+    const res = await api.post("/api/auth/login", form);
+    login(res.data);
+    toast.success("Login successful");
+    navigate("/");
+  } catch (err) {
+    setError("Invalid email or password");
+    toast.error("Invalid email or password");
+  }
+};
 
   return (
     <div className="auth-page">

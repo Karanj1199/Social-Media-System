@@ -2,14 +2,20 @@ window.global = window;
 
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { Toaster } from "react-hot-toast";
 import App from "./App";
 import { AuthProvider } from "./context/AuthContext";
 import "./index.css";
+
+if (localStorage.getItem("theme") === "dark") {
+  document.body.classList.add("dark-mode");
+}
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AuthProvider>
       <App />
+      <Toaster position="top-right" />
     </AuthProvider>
   </React.StrictMode>
 );

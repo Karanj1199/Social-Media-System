@@ -12,4 +12,6 @@ public class CreatePostRequest {
     @NotBlank
     @Size(max = 2000)
     private String content;
+
+    private String imageUrl;
 }

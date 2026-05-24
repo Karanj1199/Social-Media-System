@@ -1,10 +1,19 @@
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 
 function AppLayout() {
   const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem("theme") === "dark";
+  });
+
+  useEffect(() => {
+    document.body.classList.toggle("dark-mode", darkMode);
+    localStorage.setItem("theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
 
   const handleLogout = () => {
     logout();
@@ -26,6 +35,13 @@ function AppLayout() {
           <Link to="/trending">Trending</Link>
           <Link to="/recommendations">Recommendations</Link>
         </nav>
+
+        <button
+          className="theme-btn"
+          onClick={() => setDarkMode((prev) => !prev)}
+        >
+          {darkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
+        </button>
 
         <button className="logout-btn" onClick={handleLogout}>
           Logout

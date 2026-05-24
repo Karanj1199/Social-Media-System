@@ -5,19 +5,25 @@ function SearchPage() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
 
-  const handleSearch = async () => {
-    if (!query.trim()) {
-      setResults([]);
-      return;
-    }
+const handleSearch = async () => {
+  if (!query.trim()) {
+    setResults([]);
+    toast.error("Enter a search term");
+    return;
+  }
 
-    try {
-      const res = await api.get(`/api/users/search?query=${query}`);
-      setResults(res.data);
-    } catch (err) {
-      console.error("Failed to search users", err);
+  try {
+    const res = await api.get(`/api/users/search?query=${query}`);
+    setResults(res.data);
+
+    if (res.data.length === 0) {
+      toast.error("No users found");
     }
-  };
+  } catch (err) {
+    console.error("Failed to search users", err);
+    toast.error("Search failed");
+  }
+};
 
   return (
     <div style={{ padding: "2rem", maxWidth: "700px", margin: "0 auto" }}>

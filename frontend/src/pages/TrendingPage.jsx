@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import api from "../services/api";
 
 function TrendingPage() {
-
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
@@ -19,42 +18,34 @@ function TrendingPage() {
   };
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "700px", margin: "0 auto" }}>
-      <h2>Trending Posts</h2>
+    <div className="page-container">
+      <h1 className="page-title">Trending Posts</h1>
 
       {posts.length === 0 ? (
-        <p>No trending posts.</p>
+        <div className="card">
+          <p>No trending posts.</p>
+        </div>
       ) : (
         posts.map((post) => (
-          <div
-            key={post.id}
-            style={{
-              border: "1px solid #ddd",
-              borderRadius: "8px",
-              padding: "1rem",
-              marginBottom: "1rem",
-              backgroundColor: "#fff",
-            }}
-          >
+          <div className="card" key={post.id}>
             <p>
-              <strong>{post.fullName}</strong> (@{post.username})
+              <strong>{post.fullName}</strong>{" "}
+              <span className="meta">@{post.username}</span>
             </p>
 
             <p>{post.content}</p>
 
-            <div style={{ marginTop: "1rem" }}>
-              <small>Likes: {post.likesCount}</small>
-            </div>
+            {post.imageUrl && (
+              <img
+                src={`http://localhost:8080${post.imageUrl}`}
+                alt="Post"
+                className="post-image"
+              />
+            )}
 
-            <div>
-              <small>Comments: {post.commentsCount}</small>
-            </div>
-
-            <div>
-              <small>
-                Engagement Score: {post.engagementScore}
-              </small>
-            </div>
+            <p className="meta">Likes: {post.likesCount}</p>
+            <p className="meta">Comments: {post.commentsCount}</p>
+            <p className="meta">Engagement Score: {post.engagementScore}</p>
           </div>
         ))
       )}

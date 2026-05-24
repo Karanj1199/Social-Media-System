@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
+import toast from "react-hot-toast";
 
 function ProfilePage() {
   const [profile, setProfile] = useState(null);
@@ -63,36 +64,71 @@ function ProfilePage() {
     });
   };
 
-  const updateProfile = async (e) => {
-    e.preventDefault();
+const uploadProfilePicture = async (e) => {
+  const file = e.target.files[0];
 
-    try {
-      const res = await api.put("/api/users/profile", form);
-      setProfile(res.data);
-      setMessage("Profile updated successfully");
-    } catch (err) {
-      console.error("Failed to update profile", err);
-      setMessage("Failed to update profile");
-    }
-  };
+  if (!file) return;
 
-  const createPost = async (e) => {
-    e.preventDefault();
-    if (!postContent.trim()) return;
+  const formData = new FormData();
+  formData.append("file", file);
 
-    try {
-      await api.post("/api/posts", {
-        content: postContent,
-      });
+  try {
+    const res = await api.post("/api/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
-      setPostContent("");
-      setMessage("Post created successfully");
-      fetchPosts(profile.id);
-    } catch (err) {
-      console.error("Failed to create post", err);
-      setMessage("Failed to create post");
-    }
-  };
+    setForm((prev) => ({
+      ...prev,
+      profilePictureUrl: res.data,
+    }));
+
+    toast.success("Profile picture uploaded");
+  } catch (err) {
+    console.error("Failed to upload image", err);
+    toast.error("Failed to upload profile picture");
+  }
+};
+
+const updateProfile = async (e) => {
+  e.preventDefault();
+
+  try {
+    const res = await api.put("/api/users/profile", form);
+    setProfile(res.data);
+    setMessage("Profile updated successfully");
+    toast.success("Profile updated successfully");
+  } catch (err) {
+    console.error("Failed to update profile", err);
+    setMessage("Failed to update profile");
+    toast.error("Failed to update profile");
+  }
+};
+
+const createPost = async (e) => {
+  e.preventDefault();
+
+  if (!postContent.trim()) {
+    toast.error("Post cannot be empty");
+    return;
+  }
+
+  try {
+    await api.post("/api/posts", {
+      content: postContent,
+    });
+
+    setPostContent("");
+    setMessage("Post created successfully");
+    toast.success("Post created successfully");
+    fetchPosts(profile.id);
+  } catch (err) {
+    console.error("Failed to create post", err);
+    setMessage("Failed to create post");
+    toast.error("Failed to create post");
+  }
+};
 
   if (!profile) {
     return <div className="page-container">Loading profile...</div>;
@@ -111,7 +147,17 @@ function ProfilePage() {
     <div className="page-container">
       <div className="profile-header">
         <div className="profile-top">
-          <div className="avatar">{initials}</div>
+          <div className="avatar">
+            {profile.profilePictureUrl ? (
+              <img
+                src={`http://localhost:8080${profile.profilePictureUrl}`}
+                alt="Profile"
+                className="avatar-img"
+              />
+            ) : (
+              initials
+            )}
+          </div>
 
           <div>
             <h1 style={{ margin: 0 }}>{profile.fullName}</h1>
@@ -167,13 +213,15 @@ function ProfilePage() {
             onChange={handleChange}
           />
 
-          <input
-            type="text"
-            name="profilePictureUrl"
-            placeholder="Profile Picture URL"
-            value={form.profilePictureUrl}
-            onChange={handleChange}
-          />
+<div>
+  <label>Upload Profile Picture</label>
+
+  <input
+    type="file"
+    accept="image/*"
+    onChange={uploadProfilePicture}
+  />
+</div>
 
           <input
             type="text"

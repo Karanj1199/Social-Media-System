@@ -16,14 +16,14 @@ function PeoplePage() {
       setCurrentUser(meRes.data);
 
       const usersToShow = [];
-      for (let id = 1; id <= 20; id++) {
+
+      for (let id = 1; id <= 10; id++) {
         try {
           const res = await api.get(`/api/users/${id}`);
           if (res.data.id !== meRes.data.id) {
             usersToShow.push(res.data);
           }
-        } catch (err) {
-        }
+        } catch {}
       }
 
       setUsers(usersToShow);
@@ -33,55 +33,59 @@ function PeoplePage() {
         const statusRes = await api.get(`/api/users/${user.id}/is-following`);
         statusMap[user.id] = statusRes.data.following;
       }
+
       setFollowStatus(statusMap);
     } catch (err) {
       console.error("Failed to fetch people", err);
     }
   };
 
-  const handleFollowToggle = async (userId, isFollowing) => {
-    try {
-      if (isFollowing) {
-        await api.delete(`/api/users/${userId}/follow`);
-      } else {
-        await api.post(`/api/users/${userId}/follow`);
-      }
-
-      setFollowStatus((prev) => ({
-        ...prev,
-        [userId]: !isFollowing,
-      }));
-    } catch (err) {
-      console.error("Failed to update follow status", err);
+const handleFollowToggle = async (userId, isFollowing) => {
+  try {
+    if (isFollowing) {
+      await api.delete(`/api/users/${userId}/follow`);
+      toast.success("User unfollowed");
+    } else {
+      await api.post(`/api/users/${userId}/follow`);
+      toast.success("User followed");
     }
-  };
+
+    setFollowStatus((prev) => ({
+      ...prev,
+      [userId]: !isFollowing,
+    }));
+  } catch (err) {
+    console.error("Failed to update follow status", err);
+    toast.error("Failed to update follow status");
+  }
+};
 
   if (!currentUser) {
-    return <div style={{ padding: "2rem" }}>Loading people...</div>;
+    return <div className="page-container">Loading people...</div>;
   }
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "700px", margin: "0 auto" }}>
-      <h2>People</h2>
+    <div className="page-container">
+      <h1 className="page-title">People</h1>
 
       {users.length === 0 ? (
-        <p>No users found.</p>
+        <div className="card">
+          <p>No users found.</p>
+        </div>
       ) : (
         users.map((user) => (
-          <div
-            key={user.id}
-            style={{
-              border: "1px solid #ddd",
-              borderRadius: "8px",
-              padding: "1rem",
-              marginBottom: "1rem",
-              backgroundColor: "#fff",
-            }}
-          >
-            <p><strong>{user.fullName}</strong> (@{user.username})</p>
-            <p>{user.email}</p>
+          <div className="card" key={user.id}>
+            <p>
+              <strong>{user.fullName}</strong>{" "}
+              <span className="meta">@{user.username}</span>
+            </p>
+
+            <p className="meta">{user.email}</p>
+
             <button
-              onClick={() => handleFollowToggle(user.id, followStatus[user.id])}
+              onClick={() =>
+                handleFollowToggle(user.id, followStatus[user.id])
+              }
             >
               {followStatus[user.id] ? "Unfollow" : "Follow"}
             </button>

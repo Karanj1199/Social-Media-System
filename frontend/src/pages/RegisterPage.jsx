@@ -2,6 +2,7 @@ import { useState, useContext } from "react";
 import api from "../services/api";
 import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 function RegisterPage() {
   const [form, setForm] = useState({
@@ -19,18 +20,20 @@ function RegisterPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
 
-    try {
-      const res = await api.post("/api/auth/register", form);
-      login(res.data);
-      navigate("/");
-    } catch (err) {
-      setError("Registration failed. Try another email or username.");
-    }
-  };
+  try {
+    const res = await api.post("/api/auth/register", form);
+    login(res.data);
+    toast.success("Account created successfully");
+    navigate("/");
+  } catch (err) {
+    setError("Registration failed. Try another email or username.");
+    toast.error("Registration failed");
+  }
+};
 
   return (
     <div className="auth-page">

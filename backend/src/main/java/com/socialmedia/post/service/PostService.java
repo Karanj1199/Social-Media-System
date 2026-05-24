@@ -35,6 +35,7 @@ public class PostService {
 
         Post post = Post.builder()
                 .content(request.getContent())
+                .imageUrl(request.getImageUrl())
                 .user(user)
                 .build();
 
@@ -100,6 +101,8 @@ public class PostService {
                 .userId(post.getUser().getId())
                 .username(post.getUser().getUsername())
                 .fullName(post.getUser().getFullName())
+                .profilePictureUrl(post.getUser().getProfilePictureUrl())
+                .imageUrl(post.getImageUrl())
                 .createdAt(post.getCreatedAt())
                 .likesCount(likesCount)
                 .commentsCount(commentsCount)
