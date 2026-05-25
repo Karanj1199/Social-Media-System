@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.cache.annotation.CacheEvict;
 
 import java.util.List;
 
@@ -25,6 +26,7 @@ public class CommentService {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
 
+    @CacheEvict(value = "trendingPosts", allEntries = true)
     public CommentResponse addComment(Long postId, String email, CommentRequest request) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));

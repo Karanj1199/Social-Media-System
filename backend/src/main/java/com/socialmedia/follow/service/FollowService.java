@@ -9,6 +9,7 @@ import com.socialmedia.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.CacheEvict;
 
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ public class FollowService {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
 
+    @CacheEvict(value = "recommendedUsers", allEntries = true)
     @Transactional
     public Map<String, Object> followUser(Long targetUserId, String currentUserEmail) {
         User currentUser = userRepository.findByEmail(currentUserEmail)
@@ -64,6 +66,7 @@ public class FollowService {
         );
     }
 
+    @CacheEvict(value = "recommendedUsers", allEntries = true)
     @Transactional
     public Map<String, Object> unfollowUser(Long targetUserId, String currentUserEmail) {
         User currentUser = userRepository.findByEmail(currentUserEmail)

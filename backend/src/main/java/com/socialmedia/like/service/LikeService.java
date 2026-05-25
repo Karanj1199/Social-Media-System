@@ -10,6 +10,7 @@ import com.socialmedia.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.CacheEvict;
 
 import java.util.Map;
 
@@ -22,6 +23,7 @@ public class LikeService {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
 
+    @CacheEvict(value = "trendingPosts", allEntries = true)
     @Transactional
     public Map<String, Object> toggleLike(Long postId, String email) {
         User user = userRepository.findByEmail(email)

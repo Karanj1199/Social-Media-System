@@ -15,6 +15,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +31,8 @@ public class PostService {
     private final FollowRepository followRepository;
     private final CommentRepository commentRepository;
 
+    @CacheEvict(value = "trendingPosts", allEntries = true)
+    @Transactional
     public PostResponse createPost(String email, CreatePostRequest request) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -73,6 +77,7 @@ public class PostService {
         return posts.map(this::mapToResponse);
     }
 
+    @Cacheable(value = "trendingPosts")
     @Transactional(readOnly = true)
     public List<PostResponse> getTrendingPosts() {
 
