@@ -38,7 +38,8 @@ public class SecurityConfig {
                                 "/api/health",
                                 "/api/upload/**",
                                 "/uploads/**",
-                                "/ws-chat/**"
+                                "/ws-chat/**",
+                                "/actuator/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
