@@ -1,6 +1,5 @@
-version: "3.8"
-
 services:
+
   postgres:
     image: postgres:16
     container_name: social_media_postgres
@@ -18,6 +17,53 @@ services:
     container_name: social_media_redis
     ports:
       - "6379:6379"
+
+  backend:
+    build: ./backend
+    container_name: social_media_backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/social_media_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATA_REDIS_HOST: redis
+    volumes:
+      - ./backend/uploads:/app/uploads
+
+  frontend:
+    build: ./frontend
+    container_name: social_media_frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+  nginx:
+    build: ./nginx
+    container_name: social_media_nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - backend
+
+  prometheus:
+    image: prom/prometheus
+    container_name: social_media_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
+  grafana:
+    image: grafana/grafana
+    container_name: social_media_grafana
+    ports:
+      - "3000:3000"
 
 volumes:
   postgres_data:
