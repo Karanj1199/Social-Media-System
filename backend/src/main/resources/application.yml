@@ -7,8 +7,8 @@ spring:
 
   datasource:
     url: jdbc:postgresql://localhost:5433/social_media_db
-    username: postgres
-    password: postgres
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -34,7 +34,7 @@ spring:
       max-request-size: 10MB
 
 jwt:
-  secret: 6a6f686e646f65736f6369616c6d6564696173797374656d7365637265746b657931323334353637383930
+  secret: ${JWT_SECRET}
   expiration: 86400000
 
 file:
