@@ -37,7 +37,7 @@ function TrendingPage() {
 
             {post.imageUrl && (
               <img
-                src={`http://localhost:8080${post.imageUrl}`}
+                src={post.imageUrl}
                 alt="Post"
                 className="post-image"
               />

@@ -40,11 +40,14 @@ function ProfilePage() {
 
       fetchPosts(res.data.id);
 
-      const countsRes = await api.get(`/api/users/${res.data.id}/follow-counts`);
+      const countsRes = await api.get(
+        `/api/users/${res.data.id}/follow-counts`
+      );
       setFollowCounts(countsRes.data);
     } catch (err) {
       console.error("Failed to fetch profile", err);
       setMessage("Failed to load profile");
+      toast.error("Failed to load profile");
     }
   };
 
@@ -64,71 +67,71 @@ function ProfilePage() {
     });
   };
 
-const uploadProfilePicture = async (e) => {
-  const file = e.target.files[0];
+  const uploadProfilePicture = async (e) => {
+    const file = e.target.files[0];
 
-  if (!file) return;
+    if (!file) return;
 
-  const formData = new FormData();
-  formData.append("file", file);
+    const formData = new FormData();
+    formData.append("file", file);
 
-  try {
-    const res = await api.post("/api/upload", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    try {
+      const res = await api.post("/api/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-    setForm((prev) => ({
-      ...prev,
-      profilePictureUrl: res.data,
-    }));
+      setForm((prev) => ({
+        ...prev,
+        profilePictureUrl: res.data,
+      }));
 
-    toast.success("Profile picture uploaded");
-  } catch (err) {
-    console.error("Failed to upload image", err);
-    toast.error("Failed to upload profile picture");
-  }
-};
+      toast.success("Profile picture uploaded");
+    } catch (err) {
+      console.error("Failed to upload image", err);
+      toast.error("Failed to upload profile picture");
+    }
+  };
 
-const updateProfile = async (e) => {
-  e.preventDefault();
+  const updateProfile = async (e) => {
+    e.preventDefault();
 
-  try {
-    const res = await api.put("/api/users/profile", form);
-    setProfile(res.data);
-    setMessage("Profile updated successfully");
-    toast.success("Profile updated successfully");
-  } catch (err) {
-    console.error("Failed to update profile", err);
-    setMessage("Failed to update profile");
-    toast.error("Failed to update profile");
-  }
-};
+    try {
+      const res = await api.put("/api/users/profile", form);
+      setProfile(res.data);
+      setMessage("Profile updated successfully");
+      toast.success("Profile updated successfully");
+    } catch (err) {
+      console.error("Failed to update profile", err);
+      setMessage("Failed to update profile");
+      toast.error("Failed to update profile");
+    }
+  };
 
-const createPost = async (e) => {
-  e.preventDefault();
+  const createPost = async (e) => {
+    e.preventDefault();
 
-  if (!postContent.trim()) {
-    toast.error("Post cannot be empty");
-    return;
-  }
+    if (!postContent.trim()) {
+      toast.error("Post cannot be empty");
+      return;
+    }
 
-  try {
-    await api.post("/api/posts", {
-      content: postContent,
-    });
+    try {
+      await api.post("/api/posts", {
+        content: postContent,
+      });
 
-    setPostContent("");
-    setMessage("Post created successfully");
-    toast.success("Post created successfully");
-    fetchPosts(profile.id);
-  } catch (err) {
-    console.error("Failed to create post", err);
-    setMessage("Failed to create post");
-    toast.error("Failed to create post");
-  }
-};
+      setPostContent("");
+      setMessage("Post created successfully");
+      toast.success("Post created successfully");
+      fetchPosts(profile.id);
+    } catch (err) {
+      console.error("Failed to create post", err);
+      setMessage("Failed to create post");
+      toast.error("Failed to create post");
+    }
+  };
 
   if (!profile) {
     return <div className="page-container">Loading profile...</div>;
@@ -150,7 +153,7 @@ const createPost = async (e) => {
           <div className="avatar">
             {profile.profilePictureUrl ? (
               <img
-                src={`http://localhost:8080${profile.profilePictureUrl}`}
+                src={profile.profilePictureUrl}
                 alt="Profile"
                 className="avatar-img"
               />
@@ -162,7 +165,9 @@ const createPost = async (e) => {
           <div>
             <h1 style={{ margin: 0 }}>{profile.fullName}</h1>
             <p style={{ margin: "6px 0" }}>@{profile.username}</p>
-            <p style={{ margin: 0 }}>{profile.headline || "No headline yet"}</p>
+            <p style={{ margin: 0 }}>
+              {profile.headline || "No headline yet"}
+            </p>
           </div>
         </div>
 
@@ -213,15 +218,11 @@ const createPost = async (e) => {
             onChange={handleChange}
           />
 
-<div>
-  <label>Upload Profile Picture</label>
+          <div>
+            <label>Upload Profile Picture</label>
 
-  <input
-    type="file"
-    accept="image/*"
-    onChange={uploadProfilePicture}
-  />
-</div>
+            <input type="file" accept="image/*" onChange={uploadProfilePicture} />
+          </div>
 
           <input
             type="text"
@@ -271,7 +272,13 @@ const createPost = async (e) => {
               <strong>{post.fullName}</strong>{" "}
               <span className="meta">@{post.username}</span>
             </p>
-            <p>{post.content}</p>
+
+            {post.content && <p>{post.content}</p>}
+
+            {post.imageUrl && (
+              <img src={post.imageUrl} alt="Post" className="post-image" />
+            )}
+
             <p className="meta">
               {post.createdAt ? new Date(post.createdAt).toLocaleString() : ""}
             </p>

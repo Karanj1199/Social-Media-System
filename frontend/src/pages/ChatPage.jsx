@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import SockJS from "sockjs-client/dist/sockjs";
 import { Client } from "@stomp/stompjs";
+import toast from "react-hot-toast";
 import api from "../services/api";
 
 function ChatPage() {
@@ -32,24 +33,29 @@ function ChatPage() {
   }, [messages]);
 
   const fetchCurrentUserAndUsers = async () => {
-    const meRes = await api.get("/api/users/me");
-    setCurrentUser(meRes.data);
+    try {
+      const meRes = await api.get("/api/users/me");
+      setCurrentUser(meRes.data);
 
-    const usersToShow = [];
+      const usersToShow = [];
 
-    for (let id = 1; id <= 5; id++) {
-      try {
-        const res = await api.get(`/api/users/${id}`);
-        if (res.data.id !== meRes.data.id) usersToShow.push(res.data);
-      } catch {}
+      for (let id = 1; id <= 5; id++) {
+        try {
+          const res = await api.get(`/api/users/${id}`);
+          if (res.data.id !== meRes.data.id) usersToShow.push(res.data);
+        } catch {}
+      }
+
+      setUsers(usersToShow);
+    } catch (err) {
+      console.error("Failed to fetch users", err);
+      toast.error("Failed to load chat users");
     }
-
-    setUsers(usersToShow);
   };
 
   const connectWebSocket = () => {
     const client = new Client({
-      webSocketFactory: () => new SockJS("http://localhost:8080/ws-chat"),
+      webSocketFactory: () => new SockJS("/ws-chat"),
       reconnectDelay: 5000,
       onConnect: () => console.log("Connected to WebSocket"),
       onStompError: (frame) => console.error("Broker error:", frame),
@@ -90,30 +96,33 @@ function ChatPage() {
       }
     } catch (err) {
       console.error("Failed to load conversation", err);
+      toast.error("Failed to load conversation");
     }
   };
 
-const sendMessage = async () => {
-  if (!messageInput.trim() || !selectedUser) {
-    toast.error("Message cannot be empty");
-    return;
+  const sendMessage = async () => {
+    if (!messageInput.trim() || !selectedUser) {
+      toast.error("Message cannot be empty");
+      return;
+    }
+
+    try {
+      const res = await api.post("/api/messages", {
+        receiverId: selectedUser.id,
+        content: messageInput,
+      });
+
+      setMessages((prev) => [...prev, res.data]);
+      setMessageInput("");
+    } catch (err) {
+      console.error("Failed to send message", err);
+      toast.error("Failed to send message");
+    }
+  };
+
+  if (!currentUser) {
+    return <div className="page-container">Loading chat...</div>;
   }
-
-  try {
-    const res = await api.post("/api/messages", {
-      receiverId: selectedUser.id,
-      content: messageInput,
-    });
-
-    setMessages((prev) => [...prev, res.data]);
-    setMessageInput("");
-  } catch (err) {
-    console.error("Failed to send message", err);
-    toast.error("Failed to send message");
-  }
-};
-
-  if (!currentUser) return <div className="page-container">Loading chat...</div>;
 
   return (
     <div className="chat-layout">
@@ -123,7 +132,9 @@ const sendMessage = async () => {
         {users.map((user) => (
           <div
             key={user.id}
-            className={`chat-user ${selectedUser?.id === user.id ? "active" : ""}`}
+            className={`chat-user ${
+              selectedUser?.id === user.id ? "active" : ""
+            }`}
             onClick={() => loadConversation(user)}
           >
             <strong>{user.fullName}</strong>

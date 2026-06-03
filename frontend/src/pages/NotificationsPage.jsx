@@ -18,26 +18,23 @@ function NotificationsPage() {
   };
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "700px", margin: "0 auto" }}>
-      <h2>Notifications</h2>
+    <div className="page-container">
+      <h1 className="page-title">Notifications</h1>
 
       {notifications.length === 0 ? (
-        <p>No notifications yet.</p>
+        <div className="card">
+          <p>No notifications yet.</p>
+        </div>
       ) : (
         notifications.map((notification) => (
-          <div
-            key={notification.id}
-            style={{
-              border: "1px solid #ddd",
-              borderRadius: "8px",
-              padding: "1rem",
-              marginBottom: "1rem",
-              backgroundColor: "#fff",
-            }}
-          >
-            <p><strong>{notification.type}</strong></p>
+          <div className="card" key={notification.id}>
+            <p>
+              <strong>{notification.type}</strong>
+            </p>
+
             <p>{notification.message}</p>
-            <small>
+
+            <small className="meta">
               {notification.createdAt
                 ? new Date(notification.createdAt).toLocaleString()
                 : ""}

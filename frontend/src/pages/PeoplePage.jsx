@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import api from "../services/api";
 
 function PeoplePage() {
@@ -37,28 +38,29 @@ function PeoplePage() {
       setFollowStatus(statusMap);
     } catch (err) {
       console.error("Failed to fetch people", err);
+      toast.error("Failed to load people");
     }
   };
 
-const handleFollowToggle = async (userId, isFollowing) => {
-  try {
-    if (isFollowing) {
-      await api.delete(`/api/users/${userId}/follow`);
-      toast.success("User unfollowed");
-    } else {
-      await api.post(`/api/users/${userId}/follow`);
-      toast.success("User followed");
-    }
+  const handleFollowToggle = async (userId, isFollowing) => {
+    try {
+      if (isFollowing) {
+        await api.delete(`/api/users/${userId}/follow`);
+        toast.success("User unfollowed");
+      } else {
+        await api.post(`/api/users/${userId}/follow`);
+        toast.success("User followed");
+      }
 
-    setFollowStatus((prev) => ({
-      ...prev,
-      [userId]: !isFollowing,
-    }));
-  } catch (err) {
-    console.error("Failed to update follow status", err);
-    toast.error("Failed to update follow status");
-  }
-};
+      setFollowStatus((prev) => ({
+        ...prev,
+        [userId]: !isFollowing,
+      }));
+    } catch (err) {
+      console.error("Failed to update follow status", err);
+      toast.error("Failed to update follow status");
+    }
+  };
 
   if (!currentUser) {
     return <div className="page-container">Loading people...</div>;

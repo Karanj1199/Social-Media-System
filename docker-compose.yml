@@ -27,13 +27,23 @@ services:
       - postgres
       - redis
     environment:
-        SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
-        SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
-        SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-        SPRING_DATA_REDIS_HOST: ${REDIS_HOST}
-        JWT_SECRET: ${JWT_SECRET}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_DATA_REDIS_HOST: ${REDIS_HOST}
+      JWT_SECRET: ${JWT_SECRET}
     volumes:
       - ./backend/uploads:/app/uploads
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: social_media_api_gateway
+    ports:
+      - "8081:8081"
+    depends_on:
+      - backend
+    environment:
+      BACKEND_SERVICE_URL: http://backend:8080
 
   frontend:
     build: ./frontend
@@ -41,7 +51,7 @@ services:
     ports:
       - "5173:5173"
     depends_on:
-      - backend
+      - api-gateway
 
   nginx:
     build: ./nginx
@@ -50,7 +60,7 @@ services:
       - "80:80"
     depends_on:
       - frontend
-      - backend
+      - api-gateway
 
   prometheus:
     image: prom/prometheus

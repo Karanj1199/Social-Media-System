@@ -1,5 +1,6 @@
 import { useState } from "react";
 import api from "../services/api";
+import toast from "react-hot-toast";
 
 function SearchPage() {
   const [query, setQuery] = useState("");

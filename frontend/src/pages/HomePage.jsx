@@ -204,7 +204,7 @@ function HomePage() {
             <div className="small-avatar">
               {currentUser?.profilePictureUrl ? (
                 <img
-                  src={`http://localhost:8080${currentUser.profilePictureUrl}`}
+                  src={currentUser.profilePictureUrl}
                   alt="Profile"
                   className="avatar-img"
                 />
@@ -226,11 +226,7 @@ function HomePage() {
           </div>
 
           {postImageUrl && (
-            <img
-              src={`http://localhost:8080${postImageUrl}`}
-              alt="Preview"
-              className="post-image"
-            />
+            <img src={postImageUrl} alt="Preview" className="post-image" />
           )}
 
           <div className="composer-actions">
@@ -257,7 +253,7 @@ function HomePage() {
                 <div className="small-avatar">
                   {post.profilePictureUrl ? (
                     <img
-                      src={`http://localhost:8080${post.profilePictureUrl}`}
+                      src={post.profilePictureUrl}
                       alt="Profile"
                       className="avatar-img"
                     />
@@ -280,11 +276,7 @@ function HomePage() {
               {post.content && <p className="post-content">{post.content}</p>}
 
               {post.imageUrl && (
-                <img
-                  src={`http://localhost:8080${post.imageUrl}`}
-                  alt="Post"
-                  className="post-image"
-                />
+                <img src={post.imageUrl} alt="Post" className="post-image" />
               )}
 
               <div className="post-stats">
