@@ -117,18 +117,18 @@ function HomePage() {
     }
   };
 
-  const fetchComments = async (postId) => {
-    try {
-      const res = await api.get(`/api/posts/${postId}/comments?page=0&size=5`);
+const fetchComments = async (postId) => {
+  try {
+    const res = await api.get(`/api/posts/${postId}/comments`);
 
-      setCommentsByPost((prev) => ({
-        ...prev,
-        [postId]: res.data.content,
-      }));
-    } catch (err) {
-      console.error("Failed to fetch comments", err);
-    }
-  };
+    setCommentsByPost((prev) => ({
+      ...prev,
+      [postId]: Array.isArray(res.data) ? res.data : res.data.content || [],
+    }));
+  } catch (err) {
+    console.error("Failed to fetch comments", err);
+  }
+};
 
   const toggleLike = async (postId) => {
     try {

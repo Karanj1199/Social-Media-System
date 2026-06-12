@@ -6,7 +6,7 @@ spring:
     name: social-media-backend
 
   datasource:
-    url: jdbc:postgresql://localhost:5433/social_media_db
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/social_media_db}
     username: ${POSTGRES_USER:postgres}
     password: ${POSTGRES_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
@@ -15,15 +15,15 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+    open-in-view: false
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
 
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
 
   cache:
     type: redis
@@ -32,6 +32,17 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+
+eureka:
+  instance:
+    hostname: backend
+    prefer-ip-address: false
+    instance-id: social-media-backend:8080
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka}
+    register-with-eureka: true
+    fetch-registry: true
 
 jwt:
   secret: ${JWT_SECRET}

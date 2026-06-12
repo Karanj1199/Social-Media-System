@@ -26,12 +26,14 @@ services:
     depends_on:
       - postgres
       - redis
+      - discovery-server
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SPRING_DATA_REDIS_HOST: ${REDIS_HOST}
       JWT_SECRET: ${JWT_SECRET}
+      EUREKA_SERVER_URL: http://discovery-server:8761/eureka
     volumes:
       - ./backend/uploads:/app/uploads
 
@@ -42,8 +44,9 @@ services:
       - "8081:8081"
     depends_on:
       - backend
+      - discovery-server
     environment:
-      BACKEND_SERVICE_URL: http://backend:8080
+      EUREKA_SERVER_URL: http://discovery-server:8761/eureka
 
   frontend:
     build: ./frontend
@@ -75,6 +78,12 @@ services:
     container_name: social_media_grafana
     ports:
       - "3000:3000"
+
+  discovery-server:
+    build: ./discovery-server
+    container_name: social_media_discovery_server
+    ports:
+      - "8761:8761"
 
 volumes:
   postgres_data:
