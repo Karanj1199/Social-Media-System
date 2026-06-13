@@ -11,36 +11,27 @@ function PeoplePage() {
     fetchCurrentUserAndUsers();
   }, []);
 
-  const fetchCurrentUserAndUsers = async () => {
-    try {
-      const meRes = await api.get("/api/users/me");
-      setCurrentUser(meRes.data);
+const fetchCurrentUserAndUsers = async () => {
+  try {
+    const meRes = await api.get("/api/users/me");
+    setCurrentUser(meRes.data);
 
-      const usersToShow = [];
+    const usersRes = await api.get("/api/users");
+    setUsers(usersRes.data);
 
-      for (let id = 1; id <= 10; id++) {
-        try {
-          const res = await api.get(`/api/users/${id}`);
-          if (res.data.id !== meRes.data.id) {
-            usersToShow.push(res.data);
-          }
-        } catch {}
-      }
+    const statusMap = {};
 
-      setUsers(usersToShow);
-
-      const statusMap = {};
-      for (const user of usersToShow) {
-        const statusRes = await api.get(`/api/users/${user.id}/is-following`);
-        statusMap[user.id] = statusRes.data.following;
-      }
-
-      setFollowStatus(statusMap);
-    } catch (err) {
-      console.error("Failed to fetch people", err);
-      toast.error("Failed to load people");
+    for (const user of usersRes.data) {
+      const statusRes = await api.get(`/api/users/${user.id}/is-following`);
+      statusMap[user.id] = statusRes.data.following;
     }
-  };
+
+    setFollowStatus(statusMap);
+  } catch (err) {
+    console.error("Failed to fetch people", err);
+    toast.error("Failed to load people");
+  }
+};
 
   const handleFollowToggle = async (userId, isFollowing) => {
     try {

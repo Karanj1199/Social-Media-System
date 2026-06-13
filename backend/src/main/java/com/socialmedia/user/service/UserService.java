@@ -27,6 +27,18 @@ public class UserService {
         return mapToResponse(user);
     }
 
+    public List<UserResponse> getAllUsers(String email) {
+
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return userRepository.findAll()
+                .stream()
+                .filter(user -> !user.getId().equals(currentUser.getId()))
+                .map(this::mapToResponse)
+                .toList();
+    }
+
     public UserResponse updateProfile(String email, UpdateProfileRequest request) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));

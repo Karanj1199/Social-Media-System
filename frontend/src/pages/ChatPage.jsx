@@ -32,26 +32,39 @@ function ChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const fetchCurrentUserAndUsers = async () => {
-    try {
-      const meRes = await api.get("/api/users/me");
-      setCurrentUser(meRes.data);
+//   const fetchCurrentUserAndUsers = async () => {
+//     try {
+//       const meRes = await api.get("/api/users/me");
+//       setCurrentUser(meRes.data);
+//
+//       const usersToShow = [];
+//
+//       for (let id = 1; id <= 5; id++) {
+//         try {
+//           const res = await api.get(`/api/users/${id}`);
+//           if (res.data.id !== meRes.data.id) usersToShow.push(res.data);
+//         } catch {}
+//       }
+//
+//       setUsers(usersToShow);
+//     } catch (err) {
+//       console.error("Failed to fetch users", err);
+//       toast.error("Failed to load chat users");
+//     }
+//   };
 
-      const usersToShow = [];
+    const fetchCurrentUserAndUsers = async () => {
+      try {
+        const meRes = await api.get("/api/users/me");
+        setCurrentUser(meRes.data);
 
-      for (let id = 1; id <= 5; id++) {
-        try {
-          const res = await api.get(`/api/users/${id}`);
-          if (res.data.id !== meRes.data.id) usersToShow.push(res.data);
-        } catch {}
+        const usersRes = await api.get("/api/users");
+        setUsers(usersRes.data);
+      } catch (err) {
+        console.error("Failed to fetch users", err);
+        toast.error("Failed to load chat users");
       }
-
-      setUsers(usersToShow);
-    } catch (err) {
-      console.error("Failed to fetch users", err);
-      toast.error("Failed to load chat users");
-    }
-  };
+    };
 
   const connectWebSocket = () => {
     const client = new Client({

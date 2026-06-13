@@ -21,6 +21,11 @@ public class UserController {
         return userService.getCurrentUser(authentication.getName());
     }
 
+    @GetMapping
+    public List<UserResponse> getAllUsers(Authentication authentication) {
+        return userService.getAllUsers(authentication.getName());
+    }
+
     @GetMapping("/search")
     public List<UserResponse> searchUsers(@RequestParam String query) {
         return userService.searchUsers(query);
