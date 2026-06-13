@@ -36,7 +36,15 @@ const handleSearch = async () => {
           placeholder="Search by username or full name"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          style={{ width: "70%", padding: "0.75rem", marginRight: "0.5rem" }}
+          style={{
+            width: "70%",
+            padding: "0.75rem",
+            marginRight: "0.5rem",
+            backgroundColor: "var(--card-bg)",
+            color: "var(--text-primary)",
+            border: "1px solid var(--border-color)",
+            borderRadius: "8px"
+          }}
         />
         <button onClick={handleSearch}>Search</button>
       </div>
@@ -48,11 +56,12 @@ const handleSearch = async () => {
           <div
             key={user.id}
             style={{
-              border: "1px solid #ddd",
-              borderRadius: "8px",
+              border: "1px solid var(--border-color)",
+              borderRadius: "12px",
               padding: "1rem",
               marginBottom: "1rem",
-              backgroundColor: "#fff",
+              backgroundColor: "var(--card-bg)",
+              color: "var(--text-primary)",
             }}
           >
             <p><strong>{user.fullName}</strong> (@{user.username})</p>

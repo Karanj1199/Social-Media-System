@@ -29,11 +29,12 @@ function RecommendationsPage() {
           <div
             key={user.id}
             style={{
-              border: "1px solid #ddd",
-              borderRadius: "8px",
+              border: "1px solid var(--border-color)",
+              borderRadius: "12px",
               padding: "1rem",
               marginBottom: "1rem",
-              backgroundColor: "#fff",
+              backgroundColor: "var(--card-bg)",
+              color: "var(--text-primary)",
             }}
           >
             <p>
