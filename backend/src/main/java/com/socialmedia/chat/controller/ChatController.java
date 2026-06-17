@@ -39,13 +39,23 @@ public class ChatController {
             @RequestBody ChatMessageRequest request,
             Authentication authentication
     ) {
-        return chatService.saveMessage(authentication.getName(), request);
+        ChatMessageResponse savedMessage =
+                chatService.saveMessage(authentication.getName(), request);
+
+        broadcastMessage(savedMessage);
+
+        return savedMessage;
     }
 
     @MessageMapping("/chat.send")
     public void sendMessage(ChatMessageRequest request, Principal principal) {
-        ChatMessageResponse savedMessage = chatService.saveMessage(principal.getName(), request);
+        ChatMessageResponse savedMessage =
+                chatService.saveMessage(principal.getName(), request);
 
+        broadcastMessage(savedMessage);
+    }
+
+    private void broadcastMessage(ChatMessageResponse savedMessage) {
         Long user1 = savedMessage.getSenderId();
         Long user2 = savedMessage.getReceiverId();
 
