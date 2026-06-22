@@ -45,6 +45,7 @@ public class CommentService {
         if (!post.getUser().getId().equals(user.getId())) {
             notificationService.createNotification(
                     post.getUser().getId(),
+                    user.getId(),
                     "COMMENT",
                     user.getUsername() + " commented on your post"
             );

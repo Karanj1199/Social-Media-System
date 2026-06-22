@@ -8,9 +8,22 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 public class NotificationResponse {
+
     private Long id;
+
     private String type;
+
     private String message;
+
     private boolean isRead;
+
     private LocalDateTime createdAt;
+
+    private Long actorId;
+
+    private String actorFullName;
+
+    private String actorUsername;
+
+    private String actorProfilePictureUrl;
 }

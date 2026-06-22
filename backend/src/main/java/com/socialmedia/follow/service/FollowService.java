@@ -56,6 +56,7 @@ public class FollowService {
 
         notificationService.createNotification(
                 targetUser.getId(),
+                currentUser.getId(),
                 "FOLLOW",
                 currentUser.getUsername() + " started following you"
         );

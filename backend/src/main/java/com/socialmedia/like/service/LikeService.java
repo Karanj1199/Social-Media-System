@@ -46,6 +46,7 @@ public class LikeService {
             if (!post.getUser().getId().equals(user.getId())) {
                 notificationService.createNotification(
                         post.getUser().getId(),
+                        user.getId(),
                         "LIKE",
                         user.getUsername() + " liked your post"
                 );
