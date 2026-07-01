@@ -6,6 +6,7 @@ import com.socialmedia.notification.repository.NotificationRepository;
 import com.socialmedia.user.entity.User;
 import com.socialmedia.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +17,7 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     public NotificationResponse createNotification(
             Long recipientId,
@@ -42,8 +44,16 @@ public class NotificationService {
                 .build();
 
         Notification savedNotification = notificationRepository.save(notification);
+        NotificationResponse response = mapToResponse(savedNotification);
 
-        return mapToResponse(savedNotification);
+        System.out.println("Broadcasting notification to recipientId: " + recipientId);
+        System.out.println("Topic: /topic/notifications/" + recipientId);
+        messagingTemplate.convertAndSend(
+                "/topic/notifications/" + recipientId,
+                response
+        );
+
+        return response;
     }
 
     public NotificationResponse createNotification(

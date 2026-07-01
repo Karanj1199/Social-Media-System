@@ -1,5 +1,7 @@
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
+import SockJS from "sockjs-client/dist/sockjs";
+import { Client } from "@stomp/stompjs";
 import { AuthContext } from "../context/AuthContext";
 import api from "../services/api";
 
@@ -8,6 +10,8 @@ function AppLayout() {
   const navigate = useNavigate();
 
   const [unreadCount, setUnreadCount] = useState(0);
+  const stompClientRef = useRef(null);
+  const subscriptionRef = useRef(null);
 
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem("theme") === "dark";
@@ -19,8 +23,28 @@ function AppLayout() {
   }, [darkMode]);
 
   useEffect(() => {
-    fetchUnreadCount();
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      initializeNotifications();
+    }
+
+    return () => {
+      subscriptionRef.current?.unsubscribe();
+      stompClientRef.current?.deactivate();
+    };
   }, []);
+
+  const initializeNotifications = async () => {
+    try {
+      await fetchUnreadCount();
+
+      const meRes = await api.get("/api/users/me");
+      connectNotificationSocket(meRes.data.id);
+    } catch (err) {
+      console.error("Failed to initialize notifications", err);
+    }
+  };
 
   const fetchUnreadCount = async () => {
     try {
@@ -31,15 +55,36 @@ function AppLayout() {
     }
   };
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
+  const connectNotificationSocket = (userId) => {
+    const client = new Client({
+      webSocketFactory: () => new SockJS("/ws-chat"),
+      reconnectDelay: 5000,
+onConnect: () => {
+  console.log("Connected to notification WebSocket");
+    console.log("Subscribing to notifications for user:", userId);
+  subscriptionRef.current = client.subscribe(
+    `/topic/notifications/${userId}`,
+    (message) => {
+      console.log("New notification received:", message.body);
 
-    if (token) {
-      fetchUnreadCount();
+      setTimeout(() => {
+        fetchUnreadCount();
+      }, 300);
     }
-  }, []);
+  );
+},
+      onStompError: (frame) => {
+        console.error("Notification WebSocket error:", frame);
+      },
+    });
+
+    client.activate();
+    stompClientRef.current = client;
+  };
 
   const handleLogout = () => {
+    subscriptionRef.current?.unsubscribe();
+    stompClientRef.current?.deactivate();
     logout();
     navigate("/login");
   };
