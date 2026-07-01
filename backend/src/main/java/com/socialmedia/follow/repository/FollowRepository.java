@@ -1,6 +1,7 @@
 package com.socialmedia.follow.repository;
 
 import com.socialmedia.follow.entity.Follow;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -11,8 +12,10 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
 
     void deleteByFollowerIdAndFollowingId(Long followerId, Long followingId);
 
+    @EntityGraph(attributePaths = {"follower", "following"})
     List<Follow> findByFollowingId(Long followingId);
 
+    @EntityGraph(attributePaths = {"follower", "following"})
     List<Follow> findByFollowerId(Long followerId);
 
     long countByFollowingId(Long followingId);

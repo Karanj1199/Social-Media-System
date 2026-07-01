@@ -563,6 +563,22 @@ body.dark-mode .post-image {
   border-color: #374151 !important;
 }
 
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+
+  .modal-overlay .card {
+    width: 450px;
+    max-height: 600px;
+    overflow-y: auto;
+  }
+
 /* Responsive */
 
 @media (max-width: 800px) {
@@ -598,4 +614,6 @@ body.dark-mode .post-image {
   .comment-box {
     flex-direction: column;
   }
+
+
 }

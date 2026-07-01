@@ -10,6 +10,11 @@ function ProfilePage() {
     followingCount: 0,
   });
 
+  const [followers, setFollowers] = useState([]);
+  const [following, setFollowing] = useState([]);
+  const [showFollowers, setShowFollowers] = useState(false);
+  const [showFollowing, setShowFollowing] = useState(false);
+
   const [form, setForm] = useState({
     fullName: "",
     bio: "",
@@ -57,6 +62,26 @@ function ProfilePage() {
       setPosts(res.data.content || []);
     } catch (err) {
       console.error("Failed to fetch posts", err);
+    }
+  };
+
+  const fetchFollowers = async () => {
+    try {
+      const res = await api.get(`/api/users/${profile.id}/followers`);
+      setFollowers(res.data);
+      setShowFollowers(true);
+    } catch (err) {
+      toast.error("Failed to load followers");
+    }
+  };
+
+  const fetchFollowing = async () => {
+    try {
+      const res = await api.get(`/api/users/${profile.id}/following`);
+      setFollowing(res.data);
+      setShowFollowing(true);
+    } catch (err) {
+      toast.error("Failed to load following");
     }
   };
 
@@ -172,12 +197,20 @@ function ProfilePage() {
         </div>
 
         <div className="profile-stats">
-          <div className="profile-stat">
+          <div
+            className="profile-stat"
+            style={{ cursor: "pointer" }}
+            onClick={fetchFollowers}
+          >
             <strong>{followCounts.followersCount}</strong>
             <div>Followers</div>
           </div>
 
-          <div className="profile-stat">
+          <div
+            className="profile-stat"
+            style={{ cursor: "pointer" }}
+            onClick={fetchFollowing}
+          >
             <strong>{followCounts.followingCount}</strong>
             <div>Following</div>
           </div>
@@ -285,6 +318,59 @@ function ProfilePage() {
           </div>
         ))
       )}
+  {showFollowers && (
+    <div className="modal-overlay">
+      <div className="card">
+        <h2>Followers</h2>
+
+        {followers.length === 0 ? (
+          <p>No followers yet.</p>
+        ) : (
+          followers.map((user) => (
+            <div
+              key={user.id}
+              style={{
+                padding: "10px 0",
+                borderBottom: "1px solid var(--border-color)",
+              }}
+            >
+              <strong>{user.fullName}</strong>
+              <div className="meta">@{user.username}</div>
+            </div>
+          ))
+        )}
+
+        <button onClick={() => setShowFollowers(false)}>Close</button>
+      </div>
+    </div>
+  )}
+
+  {showFollowing && (
+    <div className="modal-overlay">
+      <div className="card">
+        <h2>Following</h2>
+
+        {following.length === 0 ? (
+          <p>Not following anyone yet.</p>
+        ) : (
+          following.map((user) => (
+            <div
+              key={user.id}
+              style={{
+                padding: "10px 0",
+                borderBottom: "1px solid var(--border-color)",
+              }}
+            >
+              <strong>{user.fullName}</strong>
+              <div className="meta">@{user.username}</div>
+            </div>
+          ))
+        )}
+
+        <button onClick={() => setShowFollowing(false)}>Close</button>
+      </div>
+    </div>
+  )}
     </div>
   );
 }
