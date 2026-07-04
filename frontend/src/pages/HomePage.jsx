@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../services/api";
 
 function HomePage() {
+  const navigate = useNavigate();
+
   const [currentUser, setCurrentUser] = useState(null);
   const [posts, setPosts] = useState([]);
   const [commentsByPost, setCommentsByPost] = useState({});
@@ -117,18 +120,18 @@ function HomePage() {
     }
   };
 
-const fetchComments = async (postId) => {
-  try {
-    const res = await api.get(`/api/posts/${postId}/comments`);
+  const fetchComments = async (postId) => {
+    try {
+      const res = await api.get(`/api/posts/${postId}/comments`);
 
-    setCommentsByPost((prev) => ({
-      ...prev,
-      [postId]: Array.isArray(res.data) ? res.data : res.data.content || [],
-    }));
-  } catch (err) {
-    console.error("Failed to fetch comments", err);
-  }
-};
+      setCommentsByPost((prev) => ({
+        ...prev,
+        [postId]: Array.isArray(res.data) ? res.data : res.data.content || [],
+      }));
+    } catch (err) {
+      console.error("Failed to fetch comments", err);
+    }
+  };
 
   const toggleLike = async (postId) => {
     try {
@@ -250,7 +253,11 @@ const fetchComments = async (postId) => {
               ref={isLastPost ? lastPostRef : null}
             >
               <div className="post-header">
-                <div className="small-avatar">
+                <div
+                  className="small-avatar"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => navigate(`/profile/${post.userId}`)}
+                >
                   {post.profilePictureUrl ? (
                     <img
                       src={post.profilePictureUrl}
@@ -263,7 +270,13 @@ const fetchComments = async (postId) => {
                 </div>
 
                 <div>
-                  <p className="post-author">{post.fullName}</p>
+                  <p
+                    className="post-author"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => navigate(`/profile/${post.userId}`)}
+                  >
+                    {post.fullName}
+                  </p>
                   <p className="meta">
                     @{post.username} ·{" "}
                     {post.createdAt
@@ -301,10 +314,17 @@ const fetchComments = async (postId) => {
                   (commentsByPost[post.id] || []).map((comment) => (
                     <div className="comment-item" key={comment.id}>
                       <p style={{ margin: 0 }}>
-                        <strong>{comment.fullName}</strong>{" "}
+                        <strong
+                          style={{ cursor: "pointer" }}
+                          onClick={() => navigate(`/profile/${comment.userId}`)}
+                        >
+                          {comment.fullName}
+                        </strong>{" "}
                         <span className="meta">@{comment.username}</span>
                       </p>
+
                       <p style={{ margin: "4px 0" }}>{comment.content}</p>
+
                       <small className="meta">
                         {comment.createdAt
                           ? new Date(comment.createdAt).toLocaleString()

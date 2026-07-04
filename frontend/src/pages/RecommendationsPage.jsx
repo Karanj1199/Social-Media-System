@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 
 function RecommendationsPage() {
+  const navigate = useNavigate();
 
   const [users, setUsers] = useState([]);
 
@@ -28,6 +30,7 @@ function RecommendationsPage() {
         users.map((user) => (
           <div
             key={user.id}
+            onClick={() => navigate(`/profile/${user.id}`)}
             style={{
               border: "1px solid var(--border-color)",
               borderRadius: "12px",
@@ -35,6 +38,7 @@ function RecommendationsPage() {
               marginBottom: "1rem",
               backgroundColor: "var(--card-bg)",
               color: "var(--text-primary)",
+              cursor: "pointer",
             }}
           >
             <p>

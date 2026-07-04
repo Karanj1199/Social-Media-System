@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../services/api";
 
 function NotificationsPage() {
+  const navigate = useNavigate();
+
   const [notifications, setNotifications] = useState([]);
   const outletContext = useOutletContext();
   const refreshUnreadCount = outletContext?.refreshUnreadCount;
@@ -72,7 +74,13 @@ function NotificationsPage() {
             <p>{notification.message}</p>
 
             {notification.actorUsername && (
-              <p className="meta">@{notification.actorUsername}</p>
+              <p
+                className="meta"
+                style={{ cursor: "pointer" }}
+                onClick={() => navigate(`/profile/${notification.actorId}`)}
+              >
+                @{notification.actorUsername}
+              </p>
             )}
 
             <small className="meta">

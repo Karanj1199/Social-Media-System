@@ -28,12 +28,14 @@ function AppRoutes() {
         >
           <Route path="/" element={<HomePage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile/:userId" element={<ProfilePage />} />
           <Route path="/people" element={<PeoplePage />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/trending" element={<TrendingPage />} />
           <Route path="/recommendations" element={<RecommendationsPage />} />
+
         </Route>
       </Routes>
     </BrowserRouter>

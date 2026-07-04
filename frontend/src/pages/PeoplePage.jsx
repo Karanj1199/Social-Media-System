@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../services/api";
 
 function PeoplePage() {
+  const navigate = useNavigate();
+
   const [currentUser, setCurrentUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [followStatus, setFollowStatus] = useState({});
@@ -11,27 +14,27 @@ function PeoplePage() {
     fetchCurrentUserAndUsers();
   }, []);
 
-const fetchCurrentUserAndUsers = async () => {
-  try {
-    const meRes = await api.get("/api/users/me");
-    setCurrentUser(meRes.data);
+  const fetchCurrentUserAndUsers = async () => {
+    try {
+      const meRes = await api.get("/api/users/me");
+      setCurrentUser(meRes.data);
 
-    const usersRes = await api.get("/api/users");
-    setUsers(usersRes.data);
+      const usersRes = await api.get("/api/users");
+      setUsers(usersRes.data);
 
-    const statusMap = {};
+      const statusMap = {};
 
-    for (const user of usersRes.data) {
-      const statusRes = await api.get(`/api/users/${user.id}/is-following`);
-      statusMap[user.id] = statusRes.data.following;
+      for (const user of usersRes.data) {
+        const statusRes = await api.get(`/api/users/${user.id}/is-following`);
+        statusMap[user.id] = statusRes.data.following;
+      }
+
+      setFollowStatus(statusMap);
+    } catch (err) {
+      console.error("Failed to fetch people", err);
+      toast.error("Failed to load people");
     }
-
-    setFollowStatus(statusMap);
-  } catch (err) {
-    console.error("Failed to fetch people", err);
-    toast.error("Failed to load people");
-  }
-};
+  };
 
   const handleFollowToggle = async (userId, isFollowing) => {
     try {
@@ -68,7 +71,10 @@ const fetchCurrentUserAndUsers = async () => {
       ) : (
         users.map((user) => (
           <div className="card" key={user.id}>
-            <p>
+            <p
+              style={{ cursor: "pointer" }}
+              onClick={() => navigate(`/profile/${user.id}`)}
+            >
               <strong>{user.fullName}</strong>{" "}
               <span className="meta">@{user.username}</span>
             </p>

@@ -1,30 +1,33 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import toast from "react-hot-toast";
 
 function SearchPage() {
+  const navigate = useNavigate();
+
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
 
-const handleSearch = async () => {
-  if (!query.trim()) {
-    setResults([]);
-    toast.error("Enter a search term");
-    return;
-  }
-
-  try {
-    const res = await api.get(`/api/users/search?query=${query}`);
-    setResults(res.data);
-
-    if (res.data.length === 0) {
-      toast.error("No users found");
+  const handleSearch = async () => {
+    if (!query.trim()) {
+      setResults([]);
+      toast.error("Enter a search term");
+      return;
     }
-  } catch (err) {
-    console.error("Failed to search users", err);
-    toast.error("Search failed");
-  }
-};
+
+    try {
+      const res = await api.get(`/api/users/search?query=${query}`);
+      setResults(res.data);
+
+      if (res.data.length === 0) {
+        toast.error("No users found");
+      }
+    } catch (err) {
+      console.error("Failed to search users", err);
+      toast.error("Search failed");
+    }
+  };
 
   return (
     <div style={{ padding: "2rem", maxWidth: "700px", margin: "0 auto" }}>
@@ -43,7 +46,7 @@ const handleSearch = async () => {
             backgroundColor: "var(--card-bg)",
             color: "var(--text-primary)",
             border: "1px solid var(--border-color)",
-            borderRadius: "8px"
+            borderRadius: "8px",
           }}
         />
         <button onClick={handleSearch}>Search</button>
@@ -55,6 +58,7 @@ const handleSearch = async () => {
         results.map((user) => (
           <div
             key={user.id}
+            onClick={() => navigate(`/profile/${user.id}`)}
             style={{
               border: "1px solid var(--border-color)",
               borderRadius: "12px",
@@ -62,9 +66,12 @@ const handleSearch = async () => {
               marginBottom: "1rem",
               backgroundColor: "var(--card-bg)",
               color: "var(--text-primary)",
+              cursor: "pointer",
             }}
           >
-            <p><strong>{user.fullName}</strong> (@{user.username})</p>
+            <p>
+              <strong>{user.fullName}</strong> (@{user.username})
+            </p>
             <p>{user.email}</p>
             <p>{user.bio || "No bio"}</p>
           </div>
